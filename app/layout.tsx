@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'InSight Health - Perimenopause Care For Women',
-  description: 'Get compassionate guidance for perimenopause and menopause. Conversational intake, transparent costs, and access to specialized providers.',
+  title: 'InSight Health - Cuidado de Perimenopausia para Mujeres',
+  description: 'Obtén orientación compasiva para perimenopausia y menopausia. Evaluación conversacional, costos transparentes y acceso a especialistas.',
   generator: 'v0.app',
   icons: {
     icon: [
@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body className="font-sans antialiased">
         {children}
         <Analytics />
