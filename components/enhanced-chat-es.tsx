@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
-import { SymptomProfile } from '@/lib/scoring-engine'
 import { ChatSessionData, ChatMessage } from '@/lib/types'
 import { triageSymptoms } from '@/lib/triage-engine'
 import { EmergencyWarning } from './emergency-warning'
@@ -89,6 +88,30 @@ const EVALUATION_STAGES = [
     question: '¿Cuánto afectan estos síntomas tu calidad de vida? (0=No afecta, 10=Muy severo)',
   },
 ]
+
+function buildNarrativeFromSession(data: Partial<ChatSessionData>) {
+  const symptomLines = (data.symptoms || [])
+    .map((sym) => `${sym.symptom}: severidad ${sym.severity}/10`)
+    .join(', ')
+
+  const duration = (data.symptoms || []).reduce(
+    (max, sym) => Math.max(max, Number(sym.duration_months) || 0),
+    0,
+  )
+
+  return {
+    narrative: [
+      data.name ? `Nombre: ${data.name}` : '',
+      data.age ? `Edad: ${data.age}` : '',
+      symptomLines ? `Síntomas reportados: ${symptomLines}` : 'Sin síntomas detallados.',
+      `Impacto general en calidad de vida: ${Number(data.impactOnLife || 0)}/10`,
+      `Duración aproximada: ${duration} meses`,
+    ]
+      .filter(Boolean)
+      .join('. '),
+    duration,
+  }
+}
 
 export function EnhancedChatEs({ userId, onComplete, userName }: EnhancedChatEsProps) {
   const [currentStage, setCurrentStage] = useState(1)
@@ -286,7 +309,7 @@ export function EnhancedChatEs({ userId, onComplete, userName }: EnhancedChatEsP
   const handleCompleteEvaluation = async (data: Partial<ChatSessionData>) => {
     try {
       // Calcular triage antes de enviar
-      const symptomDescriptions = data.symptoms || []
+      const symptomDescriptions = (data.symptoms || []).map((s) => s.symptom)
       const severityScores = messages
         .filter(m => m.role === 'user')
         .slice(2) // Skip name and age
@@ -311,20 +334,49 @@ export function EnhancedChatEs({ userId, onComplete, userName }: EnhancedChatEsP
         ])
       }
 
-      const response = await fetch('/api/evaluacion/completar', {
+      const { narrative, duration } = buildNarrativeFromSession(data)
+      const response = await fetch('/api/analyze-symptoms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId,
-          sessionData: data,
-          triageResult: triage,
+          narrative,
+          age: Number(data.age || 0) || undefined,
+          durationMonths: duration || undefined,
+          sleepImpact: Number(data.symptoms?.find((s) => s.symptom === 'insomnio')?.severity || 0),
+          workImpact: Number(data.impactOnLife || 0),
+          emotionalImpact: Number(
+            (data.symptoms || [])
+              .filter((s) => ['cambios_humor', 'depresion_ansiedad', 'niebla_mental'].includes(s.symptom))
+              .reduce((acc, s, _, arr) => acc + Number(s.severity || 0) / Math.max(arr.length, 1), 0),
+          ),
         }),
       })
 
       if (!response.ok) throw new Error('Error al completar evaluación')
 
       const result = await response.json()
-      onComplete(result.sessionData, result.recommendedRoutes, result.routeScores)
+      const recommendedRoutes = Array.isArray(result?.recommendations)
+        ? result.recommendations.map((rec: { routeId: string }) => rec.routeId)
+        : []
+
+      const routeScores = Array.isArray(result?.recommendations)
+        ? result.recommendations.map((rec: { routeId: string; confidence: number; explanation: string }) => ({
+            routeId: rec.routeId,
+            score: Number(rec.confidence || 0),
+            reasoning: rec.explanation ? [rec.explanation] : ['Recomendación basada en análisis de síntomas.'],
+          }))
+        : []
+
+      const completedSessionData: ChatSessionData = {
+        ...(data as ChatSessionData),
+        id: String(result?.sessionId || ''),
+        completed: true,
+        recommendedRoutes,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+
+      onComplete(completedSessionData, recommendedRoutes, routeScores)
     } catch (error) {
       console.error('Error:', error)
       setMessages((prev) => [
