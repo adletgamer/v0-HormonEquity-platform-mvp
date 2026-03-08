@@ -1,26 +1,9 @@
-'use client'
-
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Heart, MessageSquare, DollarSign, Calendar } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 
 export default function Home() {
-  const supabase = createClient()
-  const [user, setUser] = useState<any>(null)
-
-  useEffect(() => {
-    const checkUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-      setUser(user)
-    }
-    checkUser()
-  }, [supabase])
-
   return (
     <main className="min-h-screen bg-gradient-to-b from-background to-secondary/10">
       {/* Header */}
@@ -41,26 +24,11 @@ export default function Home() {
               Cómo Funciona
             </Link>
           </nav>
-          <div className="flex gap-2">
-            {user ? (
-              <Link href="/protegido/inicio">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                  Mi Cuenta
-                </Button>
-              </Link>
-            ) : (
-              <>
-                <Link href="/auth/ingresar">
-                  <Button variant="outline">Ingresar</Button>
-                </Link>
-                <Link href="/auth/registrarse">
-                  <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                    Registrarse
-                  </Button>
-                </Link>
-              </>
-            )}
-          </div>
+          <Link href="/evaluar">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              Comenzar
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -78,19 +46,11 @@ export default function Home() {
               HormonEquity no diagnostica. Te orientamos y conectamos con especialistas verificados.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              {user ? (
-                <Link href="/protegido/inicio">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
-                    Comenzar Evaluación
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/auth/registrarse">
-                  <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
-                    Empezar Tu Viaje
-                  </Button>
-                </Link>
-              )}
+              <Link href="/evaluar">
+                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
+                  Comenzar Orientación
+                </Button>
+              </Link>
               <Link href="#features">
                 <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 w-full sm:w-auto">
                   Saber Más
@@ -228,19 +188,11 @@ export default function Home() {
           <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto text-balance">
             Comienza tu evaluación confidencial hoy. Obtén claridad sobre tus síntomas y encuentra el cuidado adecuado para ti.
           </p>
-          {user ? (
-            <Link href="/protegido/inicio">
-              <Button size="lg" className="bg-primary-foreground hover:bg-primary-foreground/90 text-primary">
-                Ir a Mi Evaluación
-              </Button>
-            </Link>
-          ) : (
-            <Link href="/auth/registrarse">
-              <Button size="lg" className="bg-primary-foreground hover:bg-primary-foreground/90 text-primary">
-                Comenzar Ahora
-              </Button>
-            </Link>
-          )}
+          <Link href="/evaluar">
+            <Button size="lg" className="bg-primary-foreground hover:bg-primary-foreground/90 text-primary">
+              Comenzar Ahora
+            </Button>
+          </Link>
         </div>
       </section>
 

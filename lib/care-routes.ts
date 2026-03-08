@@ -8,8 +8,8 @@ export const CARE_ROUTES = {
     icon: '📱',
     color: 'from-blue-500 to-cyan-500',
     duration: '30-45 minutos',
-    costRange: { min: 30, max: 60 },
-    currency: 'USD',
+    costRange: { min: 80, max: 150 },
+    currency: 'PEN',
     providers: ['Ginecólogo', 'Ginecóloga'],
     bestFor: ['Síntomas leves', 'Consulta inicial', 'Falta de acceso local'],
     includes: [
@@ -31,8 +31,8 @@ export const CARE_ROUTES = {
     icon: '🏥',
     color: 'from-pink-500 to-rose-500',
     duration: '60 minutos',
-    costRange: { min: 80, max: 150 },
-    currency: 'USD',
+    costRange: { min: 150, max: 300 },
+    currency: 'PEN',
     providers: ['Ginecólogo', 'Ginecóloga especialista'],
     bestFor: ['Síntomas moderados', 'Historial complejo', 'Requiere examen físico'],
     includes: [
@@ -54,8 +54,8 @@ export const CARE_ROUTES = {
     icon: '💊',
     color: 'from-purple-500 to-indigo-500',
     duration: '45-60 minutos',
-    costRange: { min: 100, max: 200 },
-    currency: 'USD',
+    costRange: { min: 250, max: 450 },
+    currency: 'PEN',
     providers: ['Endocrinólogo', 'Endocrinóloga especialista'],
     bestFor: ['Síntomas severos', 'Requiere TRH', 'Comorbilidades endócrinas'],
     includes: [
@@ -81,8 +81,8 @@ export const CARE_ROUTES = {
     icon: '🌟',
     color: 'from-amber-500 to-orange-500',
     duration: 'Programa 3 meses',
-    costRange: { min: 300, max: 600 },
-    currency: 'USD',
+    costRange: { min: 800, max: 1500 },
+    currency: 'PEN',
     providers: [
       'Ginecólogo',
       'Endocrinólogo',
@@ -114,8 +114,8 @@ export const CARE_ROUTES = {
     icon: '🧠',
     color: 'from-teal-500 to-green-500',
     duration: '50 minutos/sesión',
-    costRange: { min: 40, max: 80 },
-    currency: 'USD',
+    costRange: { min: 100, max: 200 },
+    currency: 'PEN',
     providers: ['Psicólogo', 'Psicóloga clínica', 'Terapeuta'],
     bestFor: ['Impacto emocional significativo', 'Ansiedad, depresión'],
     includes: [
@@ -145,7 +145,7 @@ export function getAllCareRoutes(): CareRoute[] {
 export function formatCostRange(route: CareRoute): string {
   const { costRange, currency } = route
   if (typeof costRange === 'object' && costRange !== null && 'min' in costRange && 'max' in costRange) {
-    return `$${costRange.min}-${costRange.max} ${currency}`
+    return `S/${costRange.min}–S/${costRange.max}`
   }
   return String(costRange)
 }
