@@ -42,6 +42,8 @@ export interface UseVoiceReturn {
   isListening: boolean
   transcript: string
   sttSupported: boolean
+  sttPermission: 'prompt' | 'granted' | 'denied'
+  sttError: string | null
   // General
   voiceReady: boolean
 }
@@ -63,7 +65,11 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
   const [isListening, setIsListening] = useState(false)
   const [transcript, setTranscript] = useState('')
   const [sttSupported, setSttSupported] = useState(false)
+  const [sttPermission, setSttPermission] = useState<'prompt' | 'granted' | 'denied'>('prompt')
+  const [sttError, setSttError] = useState<string | null>(null)
   const recognitionRef = useRef<any>(null)
+  const languageRef = useRef(language)
+  const finalTranscriptRef = useRef('')
 
   // Check if ElevenLabs is configured
   const voiceReady = !!ELEVENLABS_API_KEY
@@ -82,29 +88,61 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
     const recognition = new SpeechRecognition()
     recognition.lang = language
     recognition.interimResults = true
-    recognition.continuous = false
+    recognition.continuous = true
     recognition.maxAlternatives = 1
+    languageRef.current = language
+
+    recognition.onstart = () => {
+      setIsListening(true)
+      setSttError(null)
+    }
 
     recognition.onresult = (event: any) => {
-      let finalTranscript = ''
+      let finalChunk = ''
       let interimTranscript = ''
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const result = event.results[i]
         if (result.isFinal) {
-          finalTranscript += result[0].transcript
+          finalChunk += result[0].transcript
         } else {
           interimTranscript += result[0].transcript
         }
       }
-      setTranscript(finalTranscript || interimTranscript)
+
+      if (finalChunk) {
+        finalTranscriptRef.current = `${finalTranscriptRef.current} ${finalChunk}`.trim()
+      }
+
+      const liveTranscript = `${finalTranscriptRef.current} ${interimTranscript}`.trim()
+      setTranscript(liveTranscript)
     }
 
     recognition.onend = () => {
+      if (finalTranscriptRef.current) {
+        setTranscript(finalTranscriptRef.current)
+      }
       setIsListening(false)
     }
 
     recognition.onerror = (event: any) => {
       console.warn('STT error:', event.error)
+      if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+        setSttPermission('denied')
+        setSttError('Permiso de micrófono bloqueado. Habilítalo en tu navegador.')
+      } else if (event.error === 'no-speech') {
+        setSttError('No detecté voz. Acércate al micrófono e inténtalo otra vez.')
+      } else if (event.error === 'audio-capture') {
+        setSttError('No pude acceder a tu micrófono. Revisa que esté conectado y habilitado.')
+      } else if (event.error === 'language-not-supported') {
+        // fallback pragmático para navegadores que no soportan es-PE
+        if (languageRef.current !== 'es-ES') {
+          languageRef.current = 'es-ES'
+          recognition.lang = 'es-ES'
+          setSttError('Tu navegador no soporta ese idioma. Cambié automáticamente a español estándar.')
+        }
+      } else {
+        setSttError('No pude escuchar bien. Inténtalo nuevamente.')
+      }
       setIsListening(false)
     }
 
@@ -199,14 +237,41 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
   // --- STT Controls ---
   const startListening = useCallback(() => {
     if (!recognitionRef.current || isListening) return
+    finalTranscriptRef.current = ''
     setTranscript('')
-    try {
-      recognitionRef.current.start()
-      setIsListening(true)
-    } catch (e) {
-      console.warn('Could not start STT:', e)
+    setSttError(null)
+
+    const startRecognition = () => {
+      try {
+        recognitionRef.current.lang = languageRef.current || language
+        recognitionRef.current.start()
+      } catch (e) {
+        console.warn('Could not start STT:', e)
+        setIsListening(false)
+        setSttError('No pude iniciar el micrófono. Inténtalo de nuevo.')
+      }
     }
-  }, [isListening])
+
+    const mediaDevices = typeof navigator !== 'undefined' ? navigator.mediaDevices : undefined
+    if (!mediaDevices?.getUserMedia) {
+      setSttError('Tu navegador no expone permisos de micrófono para esta función.')
+      startRecognition()
+      return
+    }
+
+    mediaDevices
+      .getUserMedia({ audio: true })
+      .then((stream) => {
+        stream.getTracks().forEach((track) => track.stop())
+        setSttPermission('granted')
+        startRecognition()
+      })
+      .catch(() => {
+        setSttPermission('denied')
+        setIsListening(false)
+        setSttError('Permiso de micrófono denegado. Actívalo e inténtalo nuevamente.')
+      })
+  }, [isListening, language])
 
   const stopListening = useCallback(() => {
     if (!recognitionRef.current) return
@@ -237,6 +302,8 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
     isListening,
     transcript,
     sttSupported,
+    sttPermission,
+    sttError,
     voiceReady,
   }
 }

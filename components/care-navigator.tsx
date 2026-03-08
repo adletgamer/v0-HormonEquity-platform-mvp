@@ -3,7 +3,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Heart, ArrowRight, Shield, Mic, MicOff, Volume2, VolumeX, Send } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { Heart, Shield, Mic, MicOff, Volume2, VolumeX, Send, ArrowLeft } from 'lucide-react'
 import { processUserInput, parseSymptoms, type StepType } from '@/lib/chat-intelligence'
 import { useVoice } from '@/hooks/use-voice'
 
@@ -48,11 +50,11 @@ const SYMPTOM_OPTIONS: StepOption[] = [
 ]
 
 const AGE_OPTIONS: StepOption[] = [
-  { label: '35\u201339 a\u00f1os', value: '35-39' },
-  { label: '40\u201344 a\u00f1os', value: '40-44' },
-  { label: '45\u201349 a\u00f1os', value: '45-49' },
-  { label: '50\u201354 a\u00f1os', value: '50-54' },
-  { label: '55+ a\u00f1os', value: '55+' },
+  { label: '35\u201339', value: '35-39' },
+  { label: '40\u201344', value: '40-44' },
+  { label: '45\u201349', value: '45-49' },
+  { label: '50\u201354', value: '50-54' },
+  { label: '55+', value: '55+' },
 ]
 
 const DURATION_OPTIONS: StepOption[] = [
@@ -63,16 +65,16 @@ const DURATION_OPTIONS: StepOption[] = [
 ]
 
 const IMPACT_OPTIONS: StepOption[] = [
-  { label: 'No me afecta', value: 'nada' },
+  { label: 'Nada', value: 'nada' },
   { label: 'Un poco', value: 'algo' },
   { label: 'Bastante', value: 'bastante' },
   { label: 'Mucho', value: 'mucho' },
 ]
 
 const MODALITY_OPTIONS: StepOption[] = [
-  { label: 'Virtual / telemedicina', value: 'virtual', emoji: '\uD83D\uDCBB' },
+  { label: 'Virtual', value: 'virtual', emoji: '\uD83D\uDCBB' },
   { label: 'Presencial', value: 'presencial', emoji: '\uD83C\uDFE5' },
-  { label: 'Cualquiera est\u00e1 bien', value: 'cualquiera', emoji: '\u2728' },
+  { label: 'Cualquiera', value: 'cualquiera', emoji: '\u2728' },
 ]
 
 const BUDGET_OPTIONS: StepOption[] = [
@@ -85,14 +87,14 @@ const BUDGET_OPTIONS: StepOption[] = [
 const STEP_TYPES: StepType[] = ['name', 'age', 'symptoms', 'duration', 'sleep', 'work', 'emotional', 'first_time', 'modality', 'budget']
 
 const STEP_MESSAGES: Record<StepType, string> = {
-  name: '\u00a1Hola! \uD83D\uDC9A Soy tu compa\u00f1era de orientaci\u00f3n en HormonEquity. Estoy aqu\u00ed para ayudarte a entender lo que sientes y encontrar el mejor camino de cuidado para ti.\n\n\u00bfC\u00f3mo te llamas?',
+  name: 'Hola. Soy el asistente de HormonEquity.\n\nPuedes contarme qu\u00e9 s\u00edntomas est\u00e1s sintiendo o c\u00f3mo te has estado sintiendo \u00faltimamente.\n\nPrimero, \u00bfc\u00f3mo te llamas?',
   age: '',
   symptoms: '',
   duration: '\u00bfHace cu\u00e1nto tiempo empezaste a notar estos cambios?',
-  sleep: '\u00bfC\u00f3mo est\u00e1 afectando tu sue\u00f1o?',
-  work: '\u00bfY en tu trabajo o actividades diarias?',
+  sleep: '\u00bfC\u00f3mo est\u00e1 afectando tu descanso?',
+  work: '\u00bfY en tu d\u00eda a d\u00eda — trabajo, actividades?',
   emotional: '\u00bfC\u00f3mo te ha afectado emocionalmente?',
-  first_time: '\u00bfEs la primera vez que buscas orientaci\u00f3n sobre estos s\u00edntomas?',
+  first_time: '\u00bfEs la primera vez que buscas orientaci\u00f3n para esto?',
   modality: '\u00bfC\u00f3mo preferir\u00edas recibir atenci\u00f3n?',
   budget: '\u00bfCu\u00e1l es tu presupuesto aproximado para este primer paso?',
 }
@@ -102,12 +104,14 @@ interface CareNavigatorProps {
 }
 
 export function CareNavigator({ onComplete }: CareNavigatorProps) {
+  const pathname = usePathname()
   const [currentStep, setCurrentStep] = useState(0)
   const [messages, setMessages] = useState<ChatBubble[]>([])
   const [textInput, setTextInput] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
   const [completed, setCompleted] = useState(false)
+  const [started, setStarted] = useState(false)
   const msgIdRef = useRef(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -122,6 +126,7 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
   })
 
   const currentStepType = STEP_TYPES[currentStep] || 'name'
+  const homeHref = pathname?.startsWith('/protegido') ? '/protegido/inicio' : '/'
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -131,22 +136,12 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
     scrollToBottom()
   }, [messages, isTyping])
 
-  useEffect(() => {
-    addAssistantMessage(STEP_MESSAGES.name)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
   // When voice transcript changes and is final, set it as input
   useEffect(() => {
-    if (voice.transcript && !voice.isListening) {
+    if (voice.transcript) {
       setTextInput(voice.transcript)
     }
-  }, [voice.transcript, voice.isListening])
-
-  const nextId = () => {
-    msgIdRef.current += 1
-    return `msg-${msgIdRef.current}`
-  }
+  }, [voice.transcript])
 
   const addAssistantMessage = useCallback((content: string) => {
     setIsTyping(true)
@@ -157,9 +152,8 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
         content,
       }])
       setIsTyping(false)
-      // Speak if TTS enabled
       voice.speak(content)
-    }, 600)
+    }, 700)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [voice.speak])
 
@@ -179,6 +173,24 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
     }, 200)
   }
 
+  // --- Start conversation ---
+  const startConversation = () => {
+    setStarted(true)
+    addAssistantMessage(STEP_MESSAGES.name)
+  }
+
+  // --- Voice onboarding: start with mic ---
+  const startWithVoice = () => {
+    setStarted(true)
+    addAssistantMessage(STEP_MESSAGES.name)
+    // Small delay then start listening
+    setTimeout(() => {
+      if (voice.sttSupported) {
+        voice.startListening()
+      }
+    }, 1800)
+  }
+
   // --- Apply a matched value to the current step ---
   const applyStepValue = (value: string, label: string) => {
     switch (currentStepType) {
@@ -187,14 +199,14 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
         setResult(prev => ({ ...prev, name }))
         addUserMessage(name)
         setTimeout(() => {
-          addAssistantMessage(`Encantada de conocerte, ${name} \uD83D\uDE0A\n\n\u00bfEn qu\u00e9 rango de edad te encuentras?`)
+          addAssistantMessage(`Encantada de conocerte, ${name}.\n\n\u00bfEn qu\u00e9 rango de edad te encuentras?`)
           setCurrentStep(1)
         }, 200)
         break
       }
       case 'age':
         setResult(prev => ({ ...prev, ageRange: value }))
-        advanceStep(label, `Gracias, ${result.name}. Ahora cu\u00e9ntame, \u00bfqu\u00e9 s\u00edntomas has notado? Puedes elegir varios.`)
+        advanceStep(label, `Gracias, ${result.name}. Cu\u00e9ntame, \u00bfqu\u00e9 s\u00edntomas has notado? Puedes elegir varios o describirmelos con tus palabras.`)
         break
       case 'duration':
         setResult(prev => ({ ...prev, duration: value }))
@@ -235,9 +247,12 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
         }
         addUserMessage(label)
         setCompleted(true)
+        // Voice summarization
+        const sympLabels = (result.selectedSymptoms || []).map(v => SYMPTOM_OPTIONS.find(o => o.value === v)?.label || v)
+        const summaryMsg = `Gracias por compartir, ${result.name}. Lo que entiendo es que tus s\u00edntomas \u2014 ${sympLabels.slice(0, 3).join(', ')} \u2014 est\u00e1n afectando tu d\u00eda a d\u00eda. Estoy preparando la mejor ruta de cuidado para ti...`
         setTimeout(() => {
-          addAssistantMessage(`\u00a1Gracias por compartir todo esto conmigo, ${result.name}! \uD83D\uDC9A\n\nEstoy preparando tus recomendaciones personalizadas...`)
-          setTimeout(() => onComplete(finalResult), 1500)
+          addAssistantMessage(summaryMsg)
+          setTimeout(() => onComplete(finalResult), 2000)
         }, 200)
         break
       }
@@ -251,22 +266,19 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
     if (!text || isTyping || completed) return
     setTextInput('')
 
-    // For symptoms step, try to parse symptoms from text and add to selection
     if (currentStepType === 'symptoms') {
       const sympResult = parseSymptoms(text)
       if (sympResult) {
         addUserMessage(text)
-        // Merge parsed symptoms with already-selected
         const merged = [...new Set([...selectedSymptoms, ...sympResult.matched])]
         setSelectedSymptoms(merged)
         setTimeout(() => {
-          addAssistantMessage(`Detect\u00e9: ${sympResult.labels.join(', ')}. Los agregu\u00e9 a tu selecci\u00f3n. \u00bfQuieres agregar m\u00e1s o presiona "Continuar"?`)
+          addAssistantMessage(`Detect\u00e9: ${sympResult.labels.join(', ')}. Los agregu\u00e9 a tu selecci\u00f3n. \u00bfQuieres agregar m\u00e1s o presiona \u201cContinuar\u201d?`)
         }, 200)
         return
       }
     }
 
-    // Use intelligence module
     const parsed = processUserInput(text, currentStepType, result.name || '')
 
     if (parsed.type === 'match' && parsed.value) {
@@ -274,22 +286,15 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
       return
     }
 
-    // For non-matching responses, show user msg + assistant response, don't advance
     addUserMessage(text)
     setTimeout(() => {
       addAssistantMessage(parsed.response)
     }, 200)
   }
 
-  // --- Button handlers (delegate to applyStepValue) ---
-  const handleAge = (opt: StepOption) => applyStepValue(opt.value, opt.label)
-  const handleDuration = (opt: StepOption) => applyStepValue(opt.value, opt.label)
-  const handleSleep = (opt: StepOption) => applyStepValue(opt.value, opt.label)
-  const handleWork = (opt: StepOption) => applyStepValue(opt.value, opt.label)
-  const handleEmotional = (opt: StepOption) => applyStepValue(opt.value, opt.label)
+  // --- Button handlers ---
+  const handleOption = (opt: StepOption) => applyStepValue(opt.value, opt.label)
   const handleFirstTime = (isFirst: boolean) => applyStepValue(String(isFirst), isFirst ? 'S\u00ed, es mi primera vez' : 'No, ya he buscado antes')
-  const handleModality = (opt: StepOption) => applyStepValue(opt.value, opt.label)
-  const handleBudget = (opt: StepOption) => applyStepValue(opt.value, opt.label)
 
   const handleSymptomsConfirm = () => {
     if (selectedSymptoms.length === 0) return
@@ -307,42 +312,106 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
   const totalSteps = STEP_TYPES.length
   const progress = Math.round(((currentStep + 1) / totalSteps) * 100)
 
-  // Mic toggle
   const handleMicToggle = () => {
-    if (voice.isListening) {
-      voice.stopListening()
-    } else {
-      voice.startListening()
-    }
+    if (voice.isListening) voice.stopListening()
+    else voice.startListening()
   }
 
+  // --- Welcome screen (before conversation starts) ---
+  if (!started) {
+    return (
+      <div className="flex flex-col h-full min-h-screen bg-background">
+        {/* Minimal top bar */}
+        <div className="max-w-2xl mx-auto w-full px-6 pt-6">
+          <Link href={homeHref} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition">
+            <ArrowLeft className="w-4 h-4" />
+            Inicio
+          </Link>
+        </div>
+
+        {/* Centered welcome */}
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="text-center max-w-md animate-fade-up">
+            <div className="w-16 h-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8">
+              <Heart className="w-8 h-8 text-primary fill-primary/20" />
+            </div>
+
+            {voice.sttError && (
+              <p className="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                {voice.sttError}
+              </p>
+            )}
+
+            <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">
+              HormonEquity
+            </h1>
+            <p className="text-muted-foreground mb-10 leading-relaxed text-balance">
+              Cu\u00e9ntame c\u00f3mo te has sentido \u00faltimamente. Puedes hablarme o escribirme.
+            </p>
+
+            <div className="space-y-3">
+              {/* Voice-first CTA */}
+              <button
+                onClick={startWithVoice}
+                disabled={!voice.sttSupported}
+                className="w-full flex items-center justify-center gap-3 bg-primary text-primary-foreground rounded-2xl h-14 text-sm font-medium shadow-sm shadow-primary/20 hover:shadow-md hover:bg-primary/90 transition-all"
+              >
+                <div className="w-8 h-8 bg-primary-foreground/20 rounded-xl flex items-center justify-center">
+                  <Mic className="w-4.5 h-4.5" />
+                </div>
+                {voice.sttSupported ? 'Hablar con voz' : 'Voz no disponible en este navegador'}
+              </button>
+
+              {/* Text fallback */}
+              <button
+                onClick={startConversation}
+                className="w-full flex items-center justify-center gap-2 bg-card border border-border text-foreground rounded-2xl h-14 text-sm font-medium hover:border-primary/30 hover:shadow-sm transition-all"
+              >
+                Prefiero escribir
+              </button>
+            </div>
+
+            <div className="flex items-center justify-center gap-4 mt-8 text-xs text-muted-foreground/50">
+              <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Confidencial</span>
+              <span>3 minutos</span>
+              <span>Sin registro</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // --- Chat interface ---
   return (
-    <div className="flex flex-col h-full min-h-screen bg-gradient-to-b from-background to-secondary/10">
-      {/* Header */}
-      <div className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
+    <div className="flex flex-col h-full min-h-screen bg-background">
+      {/* Header — minimal, calm */}
+      <div className="bg-background/80 backdrop-blur-md sticky top-0 z-50 border-b border-border/50">
         <div className="max-w-2xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2">
-              <Heart className="w-5 h-5 text-accent fill-accent" />
-              <span className="font-semibold text-foreground">HormonEquity</span>
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 bg-primary/10 rounded-lg flex items-center justify-center">
+                <Heart className="w-3.5 h-3.5 text-primary fill-primary/30" />
+              </div>
+              <span className="font-medium text-sm text-foreground">HormonEquity</span>
             </div>
-            <div className="flex items-center gap-2">
-              {/* Voice controls */}
+            <div className="flex items-center gap-3">
               <button
                 onClick={voice.toggleTts}
-                className={`p-1.5 rounded-lg transition ${voice.ttsEnabled ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+                className={`p-1.5 rounded-lg transition-colors ${voice.ttsEnabled ? 'bg-primary/10 text-primary' : 'text-muted-foreground/50 hover:text-muted-foreground'}`}
                 title={voice.ttsEnabled ? 'Silenciar voz' : 'Activar voz'}
               >
                 {voice.ttsEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
               </button>
-              <span className="text-xs text-muted-foreground">
-                Paso {currentStep + 1} de {totalSteps}
+              <span className="text-[11px] text-muted-foreground/60 tabular-nums">
+                {currentStep + 1}/{totalSteps}
               </span>
             </div>
           </div>
-          <div className="w-full bg-muted rounded-full h-1.5">
+          {/* Thin progress bar */}
+          <div className="w-full bg-border/50 rounded-full h-1">
             <div
-              className="bg-primary h-1.5 rounded-full transition-all duration-500 ease-out"
+              className="bg-primary/60 h-1 rounded-full transition-all duration-700 ease-out"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -352,12 +421,21 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-line ${
+          {messages.map((msg, idx) => (
+            <div
+              key={msg.id}
+              className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-fade-up`}
+              style={{ animationDelay: `${Math.min(idx * 50, 200)}ms` }}
+            >
+              {msg.role === 'assistant' && (
+                <div className="w-7 h-7 bg-primary/8 rounded-lg flex items-center justify-center mr-2.5 mt-1 flex-shrink-0">
+                  <Heart className="w-3.5 h-3.5 text-primary/60" />
+                </div>
+              )}
+              <div className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed whitespace-pre-line ${
                 msg.role === 'user'
-                  ? 'bg-primary text-primary-foreground rounded-br-sm'
-                  : 'bg-card border border-border shadow-sm rounded-bl-sm'
+                  ? 'bg-primary text-primary-foreground rounded-2xl rounded-br-md'
+                  : 'bg-card border border-border/60 shadow-sm rounded-2xl rounded-bl-md text-foreground'
               }`}>
                 {msg.content}
               </div>
@@ -365,12 +443,15 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
           ))}
 
           {isTyping && (
-            <div className="flex justify-start">
-              <div className="bg-card border border-border shadow-sm px-4 py-3 rounded-2xl rounded-bl-sm">
+            <div className="flex justify-start animate-fade-in">
+              <div className="w-7 h-7 bg-primary/8 rounded-lg flex items-center justify-center mr-2.5 mt-1 flex-shrink-0">
+                <Heart className="w-3.5 h-3.5 text-primary/60" />
+              </div>
+              <div className="bg-card border border-border/60 shadow-sm px-4 py-3.5 rounded-2xl rounded-bl-md">
                 <div className="flex gap-1.5">
-                  <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <span className="w-2 h-2 bg-muted-foreground/40 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <span className="w-1.5 h-1.5 bg-primary/30 rounded-full animate-pulse-soft" />
+                  <span className="w-1.5 h-1.5 bg-primary/30 rounded-full animate-pulse-soft delay-200" />
+                  <span className="w-1.5 h-1.5 bg-primary/30 rounded-full animate-pulse-soft delay-400" />
                 </div>
               </div>
             </div>
@@ -382,112 +463,111 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
 
       {/* Input Area */}
       {!isTyping && !completed && (
-        <div className="border-t border-border bg-background/95 backdrop-blur-sm">
-          <div className="max-w-2xl mx-auto px-4 py-3">
-            {/* Option Buttons per Step */}
-            <div className="mb-3">
-              {currentStep === 1 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {AGE_OPTIONS.map((opt) => (
-                    <Button key={opt.value} variant="outline" onClick={() => handleAge(opt)}
-                      className="rounded-xl h-auto py-2.5 text-sm hover:bg-primary/10 hover:border-primary transition">
-                      {opt.label}
-                    </Button>
+        <div className="border-t border-border/50 bg-background/80 backdrop-blur-md">
+          <div className="max-w-2xl mx-auto px-4 py-3 space-y-3">
+            {/* Option chips */}
+            {currentStep === 1 && (
+              <div className="flex flex-wrap gap-2">
+                {AGE_OPTIONS.map((opt) => (
+                  <button key={opt.value} onClick={() => handleOption(opt)}
+                    className="px-4 py-2 rounded-full text-sm border border-border/60 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all">
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {currentStep === 2 && (
+              <div className="space-y-2.5">
+                <div className="flex flex-wrap gap-2">
+                  {SYMPTOM_OPTIONS.map((opt) => (
+                    <button key={opt.value} onClick={() => toggleSymptom(opt.value)}
+                      className={`px-3 py-2 rounded-full text-sm border transition-all ${
+                        selectedSymptoms.includes(opt.value)
+                          ? 'bg-primary/10 border-primary/40 text-foreground font-medium'
+                          : 'bg-card border-border/60 text-foreground/70 hover:border-primary/30'
+                      }`}>
+                      <span className="mr-1">{opt.emoji}</span>{opt.label}
+                    </button>
                   ))}
                 </div>
-              )}
-
-              {currentStep === 2 && (
-                <div className="space-y-2">
-                  <div className="grid grid-cols-2 gap-2">
-                    {SYMPTOM_OPTIONS.map((opt) => (
-                      <button key={opt.value} onClick={() => toggleSymptom(opt.value)}
-                        className={`text-left px-3 py-2 rounded-xl text-sm border transition ${
-                          selectedSymptoms.includes(opt.value)
-                            ? 'bg-primary/10 border-primary text-foreground font-medium'
-                            : 'bg-card border-border text-foreground/80 hover:border-primary/40'
-                        }`}>
-                        <span className="mr-1.5">{opt.emoji}</span> {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                  <Button onClick={handleSymptomsConfirm} disabled={selectedSymptoms.length === 0}
-                    className="w-full rounded-xl bg-primary hover:bg-primary/90">
-                    Continuar ({selectedSymptoms.length} seleccionados)
+                {selectedSymptoms.length > 0 && (
+                  <Button onClick={handleSymptomsConfirm}
+                    className="w-full rounded-xl bg-primary hover:bg-primary/90 h-11 text-sm font-medium">
+                    Continuar con {selectedSymptoms.length} s\u00edntoma{selectedSymptoms.length > 1 ? 's' : ''}
                   </Button>
-                </div>
-              )}
+                )}
+              </div>
+            )}
 
-              {currentStep === 3 && (
-                <div className="grid grid-cols-2 gap-2">
-                  {DURATION_OPTIONS.map((opt) => (
-                    <Button key={opt.value} variant="outline" onClick={() => handleDuration(opt)}
-                      className="rounded-xl h-auto py-2.5 text-sm hover:bg-primary/10 hover:border-primary transition">
-                      {opt.label}
-                    </Button>
-                  ))}
-                </div>
-              )}
+            {currentStep === 3 && (
+              <div className="flex flex-wrap gap-2">
+                {DURATION_OPTIONS.map((opt) => (
+                  <button key={opt.value} onClick={() => handleOption(opt)}
+                    className="px-4 py-2 rounded-full text-sm border border-border/60 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all">
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
-              {(currentStep === 4 || currentStep === 5 || currentStep === 6) && (
-                <div className="grid grid-cols-2 gap-2">
-                  {IMPACT_OPTIONS.map((opt) => (
-                    <Button key={opt.value} variant="outline"
-                      onClick={() => currentStep === 4 ? handleSleep(opt) : currentStep === 5 ? handleWork(opt) : handleEmotional(opt)}
-                      className="rounded-xl h-auto py-2.5 text-sm hover:bg-primary/10 hover:border-primary transition">
-                      {opt.label}
-                    </Button>
-                  ))}
-                </div>
-              )}
+            {(currentStep === 4 || currentStep === 5 || currentStep === 6) && (
+              <div className="flex flex-wrap gap-2">
+                {IMPACT_OPTIONS.map((opt) => (
+                  <button key={opt.value}
+                    onClick={() => handleOption(opt)}
+                    className="px-4 py-2 rounded-full text-sm border border-border/60 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all">
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
-              {currentStep === 7 && (
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" onClick={() => handleFirstTime(true)}
-                    className="rounded-xl h-auto py-2.5 text-sm hover:bg-primary/10 hover:border-primary transition">
-                    S\u00ed, es mi primera vez
-                  </Button>
-                  <Button variant="outline" onClick={() => handleFirstTime(false)}
-                    className="rounded-xl h-auto py-2.5 text-sm hover:bg-primary/10 hover:border-primary transition">
-                    No, ya he buscado antes
-                  </Button>
-                </div>
-              )}
+            {currentStep === 7 && (
+              <div className="flex gap-2">
+                <button onClick={() => handleFirstTime(true)}
+                  className="flex-1 px-4 py-2.5 rounded-full text-sm border border-border/60 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all">
+                  S\u00ed, primera vez
+                </button>
+                <button onClick={() => handleFirstTime(false)}
+                  className="flex-1 px-4 py-2.5 rounded-full text-sm border border-border/60 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all">
+                  Ya he buscado antes
+                </button>
+              </div>
+            )}
 
-              {currentStep === 8 && (
-                <div className="grid grid-cols-3 gap-2">
-                  {MODALITY_OPTIONS.map((opt) => (
-                    <Button key={opt.value} variant="outline" onClick={() => handleModality(opt)}
-                      className="rounded-xl h-auto py-2.5 text-sm hover:bg-primary/10 hover:border-primary transition flex flex-col gap-1">
-                      <span>{opt.emoji}</span>
-                      <span>{opt.label}</span>
-                    </Button>
-                  ))}
-                </div>
-              )}
+            {currentStep === 8 && (
+              <div className="flex gap-2">
+                {MODALITY_OPTIONS.map((opt) => (
+                  <button key={opt.value} onClick={() => handleOption(opt)}
+                    className="flex-1 px-3 py-2.5 rounded-full text-sm border border-border/60 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all text-center">
+                    <span className="mr-1">{opt.emoji}</span>{opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
-              {currentStep === 9 && (
-                <div className="grid grid-cols-2 gap-2">
-                  {BUDGET_OPTIONS.map((opt) => (
-                    <Button key={opt.value} variant="outline" onClick={() => handleBudget(opt)}
-                      className="rounded-xl h-auto py-2.5 text-sm hover:bg-primary/10 hover:border-primary transition">
-                      {opt.label}
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </div>
+            {currentStep === 9 && (
+              <div className="flex flex-wrap gap-2">
+                {BUDGET_OPTIONS.map((opt) => (
+                  <button key={opt.value} onClick={() => handleOption(opt)}
+                    className="px-4 py-2 rounded-full text-sm border border-border/60 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all">
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
 
-            {/* Persistent text input — always visible */}
-            <form onSubmit={handleFreeText} className="flex gap-2">
+            {/* Text + voice input */}
+            <form onSubmit={handleFreeText} className="flex items-center gap-2">
               {voice.sttSupported && (
                 <button
                   type="button"
                   onClick={handleMicToggle}
-                  className={`flex-shrink-0 p-2.5 rounded-xl border transition ${
+                  className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
                     voice.isListening
-                      ? 'bg-red-50 border-red-300 text-red-500 animate-pulse'
-                      : 'bg-card border-border text-muted-foreground hover:text-foreground hover:border-primary/40'
+                      ? 'bg-primary/10 border border-primary/30 text-primary animate-pulse-soft'
+                      : 'bg-card border border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/30'
                   }`}
                   title={voice.isListening ? 'Dejar de escuchar' : 'Hablar con voz'}
                 >
@@ -499,18 +579,32 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
                 placeholder={currentStep === 0 ? 'Escribe tu nombre...' : 'Escribe o pregunta algo...'}
                 value={textInput}
                 onChange={(e) => setTextInput(e.target.value)}
-                className="flex-1 rounded-xl bg-card border-border"
+                className="flex-1 rounded-xl bg-card border-border/60 h-10 text-sm"
               />
-              <Button type="submit" disabled={!textInput.trim()} className="rounded-xl bg-primary hover:bg-primary/90 flex-shrink-0">
+              <button
+                type="submit"
+                disabled={!textInput.trim()}
+                className="flex-shrink-0 w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center disabled:opacity-30 hover:bg-primary/90 transition-all"
+              >
                 <Send className="w-4 h-4" />
-              </Button>
+              </button>
             </form>
 
+            {(voice.isListening || voice.sttError) && (
+              <div className="rounded-xl border border-border/60 bg-card px-3 py-2 text-xs">
+                {voice.isListening ? (
+                  <p className="text-primary">Te escucho... habla con naturalidad y presiona el micrófono para detener.</p>
+                ) : (
+                  <p className="text-amber-700">{voice.sttError}</p>
+                )}
+              </div>
+            )}
+
             {/* Disclaimer */}
-            <div className="flex items-center gap-1.5 mt-2.5 justify-center">
-              <Shield className="w-3 h-3 text-muted-foreground/60" />
-              <p className="text-[11px] text-muted-foreground/60">
-                HormonEquity no diagnostica. Te orientamos y conectamos con especialistas.
+            <div className="flex items-center gap-1.5 justify-center">
+              <Shield className="w-3 h-3 text-muted-foreground/40" />
+              <p className="text-[10px] text-muted-foreground/40">
+                No diagnosticamos. Te orientamos y conectamos con especialistas.
               </p>
             </div>
           </div>

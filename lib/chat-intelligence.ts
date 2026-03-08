@@ -60,8 +60,26 @@ const FAQ_RESPONSES: { patterns: RegExp[]; answer: string }[] = [
 
 // --- Text-to-Option Matchers per Step ---
 
+function normalizeText(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s/.-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function parseNumericAmount(text: string): number | null {
+  const clean = normalizeText(text).replace(/,/g, '.')
+  const match = clean.match(/(\d+(?:\.\d+)?)/)
+  if (!match) return null
+  const amount = Number(match[1])
+  return Number.isFinite(amount) ? amount : null
+}
+
 function parseAge(text: string): ParseResult | null {
-  const clean = text.toLowerCase().replace(/[^a-záéíóúñ0-9\s]/g, '')
+  const clean = normalizeText(text)
   const numMatch = clean.match(/(\d{2})/)
   if (numMatch) {
     const age = parseInt(numMatch[1])
@@ -88,23 +106,39 @@ function parseAge(text: string): ParseResult | null {
 }
 
 function parseDuration(text: string): ParseResult | null {
-  const clean = text.toLowerCase()
-  if (/menos\s*de\s*3|pocas?\s*semanas|rec[ié]en|hace\s*poco|un\s*mes|dos\s*meses/i.test(clean))
+  const clean = normalizeText(text)
+
+  const monthsMatch = clean.match(/(\d{1,2})\s*mes(?:es)?/)
+  if (monthsMatch) {
+    const months = parseInt(monthsMatch[1])
+    if (months < 3) return { type: 'match', value: 'menos_3', optionLabel: 'Menos de 3 meses', response: '' }
+    if (months <= 6) return { type: 'match', value: '3_6', optionLabel: '3 a 6 meses', response: '' }
+    if (months <= 12) return { type: 'match', value: '6_12', optionLabel: '6 a 12 meses', response: '' }
+    return { type: 'match', value: 'mas_12', optionLabel: 'Más de 1 año', response: '' }
+  }
+
+  const yearsMatch = clean.match(/(\d{1,2})\s*ano(?:s)?/)
+  if (yearsMatch) {
+    const years = parseInt(yearsMatch[1])
+    if (years >= 1) return { type: 'match', value: 'mas_12', optionLabel: 'Más de 1 año', response: '' }
+  }
+
+  if (/menos\s*de\s*3|pocas?\s*semanas|recien|hace\s*poco|un\s*mes|dos\s*meses/i.test(clean))
     return { type: 'match', value: 'menos_3', optionLabel: 'Menos de 3 meses', response: '' }
-  if (/3\s*a\s*6|tres\s*a\s*seis|medio\s*a[ñn]o|algunos\s*meses|varios\s*meses/i.test(clean))
+  if (/3\s*a\s*6|tres\s*a\s*seis|medio\s*ano|algunos\s*meses|varios\s*meses/i.test(clean))
     return { type: 'match', value: '3_6', optionLabel: '3 a 6 meses', response: '' }
-  if (/6\s*a\s*12|seis\s*a\s*doce|casi\s*un\s*a[ñn]o|medio\s*a[ñn]o\s*o\s*m[aá]s/i.test(clean))
+  if (/6\s*a\s*12|seis\s*a\s*doce|casi\s*un\s*ano|medio\s*ano\s*o\s*mas/i.test(clean))
     return { type: 'match', value: '6_12', optionLabel: '6 a 12 meses', response: '' }
-  if (/m[aá]s\s*de\s*(un\s*)?a[ñn]o|a[ñn]os|mucho\s*tiempo|bastante\s*tiempo|hace\s*rato/i.test(clean))
+  if (/mas\s*de\s*(un\s*)?ano|anos|ano\s*y\s*medio|mucho\s*tiempo|bastante\s*tiempo|hace\s*rato/i.test(clean))
     return { type: 'match', value: 'mas_12', optionLabel: 'Más de 1 año', response: '' }
   return null
 }
 
 function parseImpact(text: string): ParseResult | null {
-  const clean = text.toLowerCase()
-  if (/^no$|no\s*me\s*afecta|nada|para\s*nada|normal|bien|ning[uú]n/i.test(clean))
+  const clean = normalizeText(text)
+  if (/^no$|no\s*me\s*afecta|nada|para\s*nada|normal|bien|ningun|casi\s*nada/i.test(clean))
     return { type: 'match', value: 'nada', optionLabel: 'No me afecta', response: '' }
-  if (/un\s*poco|algo|leve|a\s*veces|de\s*vez\s*en\s*cuando|poquito/i.test(clean))
+  if (/un\s*poco|algo|leve|a\s*veces|de\s*vez\s*en\s*cuando|poquito|mas\s*o\s*menos/i.test(clean))
     return { type: 'match', value: 'algo', optionLabel: 'Un poco', response: '' }
   if (/bastante|regular|considerable|moderado|seguido|frecuente/i.test(clean))
     return { type: 'match', value: 'bastante', optionLabel: 'Bastante', response: '' }
@@ -114,16 +148,16 @@ function parseImpact(text: string): ParseResult | null {
 }
 
 function parseFirstTime(text: string): ParseResult | null {
-  const clean = text.toLowerCase()
-  if (/^s[ií]$|primera\s*vez|nunca\s*(he|habia|había)|no\s*he\s*(ido|buscado|consultado)|jamás/i.test(clean))
+  const clean = normalizeText(text)
+  if (/^si$|primera\s*vez|nunca\s*(he|habia)|no\s*he\s*(ido|buscado|consultado)|jamas/i.test(clean))
     return { type: 'match', value: 'true', optionLabel: 'Sí, es mi primera vez', response: '' }
-  if (/^no$|ya\s*(he|fui|busqu[eé]|consult[eé])|antes|anterior|ya\s*me\s*(vieron|atendieron)/i.test(clean))
+  if (/^no$|ya\s*(he|fui|busque|consulte)|antes|anterior|ya\s*me\s*(vieron|atendieron)/i.test(clean))
     return { type: 'match', value: 'false', optionLabel: 'No, ya he buscado antes', response: '' }
   return null
 }
 
 function parseModality(text: string): ParseResult | null {
-  const clean = text.toLowerCase()
+  const clean = normalizeText(text)
   if (/virtual|online|tele|remot|desde\s*casa|por\s*internet|videollamada/i.test(clean))
     return { type: 'match', value: 'virtual', optionLabel: 'Virtual / telemedicina', response: '' }
   if (/presencial|persona|consultorio|cl[ií]nica|ir\s*a|fisic/i.test(clean))
@@ -134,35 +168,38 @@ function parseModality(text: string): ParseResult | null {
 }
 
 function parseBudget(text: string): ParseResult | null {
-  const clean = text.toLowerCase()
-  const numMatch = clean.match(/(\d+)/)
-  if (numMatch) {
-    const amount = parseInt(numMatch[1])
+  const clean = normalizeText(text)
+  const amount = parseNumericAmount(clean)
+  if (amount !== null) {
     if (amount < 150) return { type: 'match', value: 'bajo', optionLabel: 'Menos de S/150', response: '' }
     if (amount <= 400) return { type: 'match', value: 'medio', optionLabel: 'S/150 – S/400', response: '' }
     if (amount <= 800) return { type: 'match', value: 'alto', optionLabel: 'S/400 – S/800', response: '' }
     return { type: 'match', value: 'flexible', optionLabel: 'Lo que sea necesario', response: '' }
   }
-  if (/poco|bajo|econ[oó]mic|barato|m[ií]nimo|ajustado/i.test(clean))
+  if (/poco|bajo|econom|barato|minimo|ajustado/i.test(clean))
     return { type: 'match', value: 'bajo', optionLabel: 'Menos de S/150', response: '' }
-  if (/lo\s*que\s*sea|no\s*importa|flexible|sin\s*l[ií]mite|necesario/i.test(clean))
+  if (/lo\s*que\s*sea|no\s*importa|flexible|sin\s*limite|necesario|sin\s*tope/i.test(clean))
     return { type: 'match', value: 'flexible', optionLabel: 'Lo que sea necesario', response: '' }
+  if (/medio|intermedio|moderado/.test(clean))
+    return { type: 'match', value: 'medio', optionLabel: 'S/150 – S/400', response: '' }
+  if (/alto|amplio|holgado/.test(clean))
+    return { type: 'match', value: 'alto', optionLabel: 'S/400 – S/800', response: '' }
   return null
 }
 
 function parseSymptoms(text: string): { matched: string[]; labels: string[] } | null {
-  const clean = text.toLowerCase()
+  const clean = normalizeText(text)
   const symptomMap: { pattern: RegExp; value: string; label: string }[] = [
-    { pattern: /sofoco|sudor|calor|bochorno|acalorada/i, value: 'sofocos', label: 'Sofocos o sudores' },
-    { pattern: /ciclo|menstr|regla|periodo|per[ií]odo/i, value: 'cambios_menstruales', label: 'Cambios en el ciclo' },
-    { pattern: /insomnio|dormir|sue[ñn]o|despierto|desvelo|noche/i, value: 'insomnio', label: 'Insomnio o mal sueño' },
-    { pattern: /fatig|cansan|agota|energia|energ[ií]a|exhaust/i, value: 'fatiga', label: 'Fatiga o agotamiento' },
-    { pattern: /humor|irritab|enojad|lloro|llorar|sensib/i, value: 'cambios_humor', label: 'Cambios de humor' },
-    { pattern: /ansied|ansiosa|depresi|triste|angustia|nervio/i, value: 'depresion_ansiedad', label: 'Ansiedad o irritabilidad' },
-    { pattern: /niebla|mental|concentra|olvido|memoria|confus/i, value: 'niebla_mental', label: 'Niebla mental' },
-    { pattern: /peso|engord|kilos|gorda|subido/i, value: 'ganancia_peso', label: 'Ganancia de peso' },
-    { pattern: /sequ|vaginal|lubric|resec/i, value: 'sequedad_vaginal', label: 'Sequedad vaginal' },
-    { pattern: /dolor|p[eé]lvic|abdom|calambre|barriga/i, value: 'dolor_pelvico', label: 'Dolor pélvico' },
+    { pattern: /sofoco|sudor|calor|bochorno|acalorada|sudoracion|sudor\s*nocturn/i, value: 'sofocos', label: 'Sofocos o sudores' },
+    { pattern: /ciclo|menstr|regla|periodo|sangrado\s*irregular|atraso/i, value: 'cambios_menstruales', label: 'Cambios en el ciclo' },
+    { pattern: /insomnio|dormir|sueno|despierto|desvelo|noche|me\s*despierto/i, value: 'insomnio', label: 'Insomnio o mal sueño' },
+    { pattern: /fatig|cansan|agota|energia|exhaust|sin\s*fuerza/i, value: 'fatiga', label: 'Fatiga o agotamiento' },
+    { pattern: /humor|irritab|enojad|lloro|llorar|sensib|cambios\s*de\s*animo/i, value: 'cambios_humor', label: 'Cambios de humor' },
+    { pattern: /ansied|ansiosa|depresi|triste|angustia|nervio|panic/i, value: 'depresion_ansiedad', label: 'Ansiedad o irritabilidad' },
+    { pattern: /niebla|mental|concentra|olvido|memoria|confus|cabeza\s*nublada/i, value: 'niebla_mental', label: 'Niebla mental' },
+    { pattern: /peso|engord|kilos|subido|subi\s*de\s*peso/i, value: 'ganancia_peso', label: 'Ganancia de peso' },
+    { pattern: /sequ|vaginal|lubric|resec|resequedad/i, value: 'sequedad_vaginal', label: 'Sequedad vaginal' },
+    { pattern: /dolor|pelvic|abdom|calambre|barriga|vientre/i, value: 'dolor_pelvico', label: 'Dolor pélvico' },
   ]
 
   const matched: string[] = []
@@ -178,20 +215,24 @@ function parseSymptoms(text: string): { matched: string[]; labels: string[] } | 
 
 // --- Common Patterns ---
 function isGreeting(text: string): boolean {
-  return /^(hola|hey|buenas|buenos?\s*d[ií]as|buenas?\s*(tardes|noches)|hi|hello|qu[eé]\s*tal)/i.test(text.trim())
+  const clean = normalizeText(text)
+  return /^(hola|hey|buenas|buenos?\s*dias|buenas?\s*(tardes|noches)|hi|hello|que\s*tal|holi)/i.test(clean)
 }
 
 function isThanks(text: string): boolean {
-  return /^(gracias|thanks|muchas?\s*gracias|te\s*agradezco|genial|perfecto|ok|okay|vale|dale)/i.test(text.trim())
+  const clean = normalizeText(text)
+  return /^(gracias|thanks|muchas?\s*gracias|te\s*agradezco|genial|perfecto|ok|okay|vale|dale|listo|super)/i.test(clean)
 }
 
 function isQuestion(text: string): boolean {
-  return /\?/.test(text) || /^(qu[eé]|c[oó]mo|cu[aá]ndo|cu[aá]nto|d[oó]nde|por\s*qu[eé]|qui[eé]n|para\s*qu[eé]|es\s+)/i.test(text.trim())
+  const clean = normalizeText(text)
+  return /\?/.test(text) || /^(que|como|cuando|cuanto|donde|por\s*que|quien|para\s*que|es\s+)/i.test(clean)
 }
 
 // --- Main Parser ---
 export function processUserInput(text: string, currentStep: StepType, userName: string): ParseResult {
   const trimmed = text.trim()
+  const normalized = normalizeText(trimmed)
 
   // Empty input
   if (!trimmed) {
@@ -199,7 +240,7 @@ export function processUserInput(text: string, currentStep: StepType, userName: 
   }
 
   // Check for emergency keywords first
-  if (/emergencia|sangrado\s*(fuerte|abundante|excesivo)|desmay|urgen|112|911/i.test(trimmed)) {
+  if (/emergencia|sangrado\s*(fuerte|abundante|excesivo)|desmay|urgen|112|911|113/.test(normalized)) {
     return {
       type: 'emergency',
       response: '⚠️ Si estás experimentando una emergencia médica, por favor llama a emergencias o acude al centro médico más cercano.\n\nLínea de emergencias Perú: 113 (SAMU)\n\nSi no es una emergencia, estoy aquí para ayudarte. ¿Seguimos?',
@@ -224,7 +265,7 @@ export function processUserInput(text: string, currentStep: StepType, userName: 
   // Check FAQ questions
   if (isQuestion(trimmed) || trimmed.length > 60) {
     for (const faq of FAQ_RESPONSES) {
-      if (faq.patterns.some(p => p.test(trimmed))) {
+      if (faq.patterns.some(p => p.test(trimmed) || p.test(normalized))) {
         return { type: 'question', response: faq.answer }
       }
     }
@@ -247,7 +288,7 @@ export function processUserInput(text: string, currentStep: StepType, userName: 
     case 'age': {
       const ageResult = parseAge(trimmed)
       if (ageResult) return ageResult
-      return { type: 'unclear', response: 'No pude entender tu edad. ¿Podrías decirme tu edad con un número (por ejemplo "tengo 45 años") o usar los botones de abajo?' }
+      return { type: 'unclear', response: 'No pude entender tu edad. ¿Podrías decirme algo como "tengo 45", "46 años" o "entre 45 y 49"? También puedes usar los botones de abajo.' }
     }
 
     case 'symptoms': {
@@ -266,7 +307,7 @@ export function processUserInput(text: string, currentStep: StepType, userName: 
     case 'duration': {
       const durResult = parseDuration(trimmed)
       if (durResult) return durResult
-      return { type: 'unclear', response: '¿Podrías decirme hace cuánto tiempo empezaron estos cambios? Por ejemplo: "hace unos 6 meses" o "hace más de un año". También puedes usar los botones.' }
+      return { type: 'unclear', response: '¿Podrías decirme hace cuánto tiempo empezaron estos cambios? Por ejemplo: "hace 8 meses", "hace 1 año" o "hace más de un año". También puedes usar los botones.' }
     }
 
     case 'sleep':

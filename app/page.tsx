@@ -1,179 +1,111 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Heart, MessageSquare, DollarSign, Calendar } from 'lucide-react'
+import { Heart, MessageCircle, Mic, Sparkles, ArrowRight, Shield, Clock, CreditCard, CalendarCheck } from 'lucide-react'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-secondary/10">
-      {/* Header */}
-      <header className="border-b border-border bg-background/95 backdrop-blur-sm sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Heart className="w-6 h-6 text-accent fill-accent" />
-            <span className="text-xl font-bold text-foreground">HormonEquity</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <Link href="#about" className="text-foreground/70 hover:text-foreground transition">
-              Acerca de
-            </Link>
-            <Link href="#features" className="text-foreground/70 hover:text-foreground transition">
-              Características
-            </Link>
-            <Link href="#how" className="text-foreground/70 hover:text-foreground transition">
-              Cómo Funciona
-            </Link>
-          </nav>
+    <main className="min-h-screen bg-background fx-grain">
+      {/* Header — minimal, breathable */}
+      <header className="bg-background/80 backdrop-blur-md sticky top-0 z-50 border-b border-border/50">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 bg-primary/10 rounded-xl flex items-center justify-center group-hover:bg-primary/15 transition-colors">
+              <Heart className="w-4.5 h-4.5 text-primary fill-primary/30" />
+            </div>
+            <span className="text-lg font-semibold text-foreground tracking-tight">HormonEquity</span>
+          </Link>
           <Link href="/evaluar">
-            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+            <Button className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 h-10 text-sm font-medium shadow-sm shadow-primary/20 transition-all hover:shadow-md hover:shadow-primary/25">
               Comenzar
             </Button>
           </Link>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 md:py-32">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 text-balance">
-              Tu Compañera de Perimenopausia, No tu Juez
-            </h1>
-            <p className="text-lg text-foreground/80 mb-8 text-balance leading-relaxed">
-              Obtén orientación personalizada para manejar síntomas de perimenopausia y menopausia. Conversaciones claras, costos transparentes y atención compasiva, todo desde tu compañera de salud de confianza.
-            </p>
-            <p className="text-sm text-muted-foreground mb-6">
-              HormonEquity no diagnostica. Te orientamos y conectamos con especialistas verificados.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/evaluar">
-                <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground w-full sm:w-auto">
-                  Comenzar Orientación
-                </Button>
-              </Link>
-              <Link href="#features">
-                <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 w-full sm:w-auto">
-                  Saber Más
-                </Button>
-              </Link>
+      {/* Hero — conversational-first, centered, calm */}
+      <section className="relative overflow-hidden fx-aurora">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] via-transparent to-transparent" />
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[68vw] h-[68vw] max-w-[760px] max-h-[760px] rounded-full bg-primary/[0.06] blur-3xl animate-aurora-float" />
+          <div className="absolute top-24 -right-24 w-[42vw] h-[42vw] max-w-[460px] max-h-[460px] rounded-full bg-accent/[0.08] blur-3xl animate-drift-x" />
+        </div>
+        <div className="max-w-3xl mx-auto px-6 pt-20 pb-24 md:pt-28 md:pb-32 text-center relative">
+          <div className="animate-fade-up">
+            <div className="inline-flex items-center gap-2 bg-accent/10 text-accent border border-accent/20 rounded-full px-4 py-1.5 text-xs font-medium mb-8">
+              <Sparkles className="w-3.5 h-3.5" />
+              Orientación con voz e inteligencia conversacional
             </div>
           </div>
-          <div className="hidden md:grid grid-cols-2 gap-4">
-            <Card className="bg-accent/10 border-accent/20 p-6 rounded-2xl">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
-                <MessageSquare className="w-6 h-6 text-accent" />
+
+          <h1 className="text-4xl md:text-[3.25rem] font-bold text-foreground mb-6 leading-tight tracking-tight animate-fade-up delay-100 text-balance">
+            Cuéntame cómo te has sentido últimamente
+          </h1>
+
+          <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed animate-fade-up delay-200 text-balance">
+            Soy tu compañera de orientación hormonal. Puedes hablarme o escribirme — te escucho sin juzgar y te conecto con el cuidado adecuado.
+          </p>
+
+          {/* Conversational CTA — looks like a chat prompt */}
+          <div className="animate-fade-up delay-300">
+            <Link href="/evaluar">
+              <div className="group max-w-lg mx-auto bg-card border border-border/80 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-primary/30 transition-all duration-300 cursor-pointer fx-shimmer-border fx-hover-lift">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors">
+                    <MessageCircle className="w-5 h-5 text-primary" />
+                  </div>
+                  <div className="flex-1 text-left">
+                    <p className="text-sm text-muted-foreground">Escribe o habla con voz...</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="w-9 h-9 bg-muted rounded-xl flex items-center justify-center">
+                      <Mic className="w-4 h-4 text-muted-foreground" />
+                    </div>
+                    <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <ArrowRight className="w-4 h-4 text-primary-foreground" />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <h3 className="font-semibold text-foreground mb-2">Pregunta Libremente</h3>
-              <p className="text-sm text-foreground/70">Sin juzgar, solo conversaciones honestas sobre tu salud</p>
-            </Card>
-            <Card className="bg-secondary/20 border-secondary/30 p-6 rounded-2xl">
-              <div className="w-12 h-12 bg-secondary/30 rounded-lg flex items-center justify-center mb-4">
-                <Heart className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold text-foreground mb-2">Orientación de Síntomas</h3>
-              <p className="text-sm text-foreground/70">Entiende tus síntomas y los próximos pasos</p>
-            </Card>
-            <Card className="bg-accent/10 border-accent/20 p-6 rounded-2xl">
-              <div className="w-12 h-12 bg-accent/20 rounded-lg flex items-center justify-center mb-4">
-                <DollarSign className="w-6 h-6 text-accent" />
-              </div>
-              <h3 className="font-semibold text-foreground mb-2">Precios Claros</h3>
-              <p className="text-sm text-foreground/70">Sabe exactamente qué cuesta antes de reservar</p>
-            </Card>
-            <Card className="bg-secondary/20 border-secondary/30 p-6 rounded-2xl">
-              <div className="w-12 h-12 bg-secondary/30 rounded-lg flex items-center justify-center mb-4">
-                <Calendar className="w-6 h-6 text-primary" />
-              </div>
-              <h3 className="font-semibold text-foreground mb-2">Reserva Fácil</h3>
-              <p className="text-sm text-foreground/70">Conecta con especialistas que entienden tu situación</p>
-            </Card>
+            </Link>
           </div>
+
+          <p className="text-xs text-muted-foreground/60 mt-6 animate-fade-up delay-400">
+            Conversación gratuita · Sin registro · 3 minutos
+          </p>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="bg-secondary/5 py-20 border-t border-border">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              ¿Por Qué Elegir HormonEquity?
+      {/* Progressive disclosure: How it works — 4 layers */}
+      <section className="py-20 md:py-24 bg-card/50">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">
+              Tu camino hacia la claridad
             </h2>
-            <p className="text-lg text-foreground/70 max-w-2xl mx-auto text-balance">
-              Creado específicamente para mujeres que navegan la perimenopausia con características diseñadas para apoyar tu viaje de salud
+            <p className="text-muted-foreground max-w-lg mx-auto text-balance">
+              Un flujo simple y humano — sin formularios largos, sin esperas
             </p>
           </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: MessageSquare,
-                title: 'Evaluación Conversacional',
-                description:
-                  'Comparte tu historia naturalmente a través de conversación inteligente, no formularios abrumadores. Nuestro AI hace las preguntas correctas en el momento correcto.',
-              },
-              {
-                icon: DollarSign,
-                title: 'Costos Transparentes',
-                description:
-                  'Sin sorpresas. Ve los costos de tratamiento, opciones de financiamiento y qué cubre tu seguro antes de tomar decisiones.',
-              },
-              {
-                icon: Heart,
-                title: 'Atención Compasiva',
-                description:
-                  'Proveedores especializados en menopausia que entienden tus necesidades de salud únicas. Finalmente, alguien que te entiende.',
-              },
-            ].map((feature, idx) => (
-              <Card key={idx} className="p-8 border-border/50 hover:border-primary/30 transition">
-                <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-6">
-                  <feature.icon className="w-7 h-7 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground mb-3">{feature.title}</h3>
-                <p className="text-foreground/70 leading-relaxed">{feature.description}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* How It Works */}
-      <section id="how" className="py-20">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground text-center mb-16">
-            ¿Cómo Funciona?
-          </h2>
-          <div className="grid md:grid-cols-4 gap-8">
+          <div className="grid md:grid-cols-4 gap-6">
             {[
-              {
-                step: '1',
-                title: 'Conversa',
-                desc: 'Cuéntanos sobre tus síntomas e historial de salud en una conversación natural',
-              },
-              {
-                step: '2',
-                title: 'Orientación',
-                desc: 'Obtén orientación personalizada y sin diagnóstico basada en tu situación única',
-              },
-              {
-                step: '3',
-                title: 'Precios',
-                desc: 'Ve precios transparentes para opciones de cuidado disponibles y próximos pasos',
-              },
-              {
-                step: '4',
-                title: 'Reserva',
-                desc: 'Conéctate con especialistas compasivos cuando estés lista',
-              },
-            ].map((item, idx) => (
-              <div key={idx} className="relative">
-                <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-xl mb-4">
-                    {item.step}
+              { icon: MessageCircle, label: 'Conversa', desc: 'Cuéntame qué síntomas estás sintiendo, con voz o texto', color: 'bg-primary/10 text-primary' },
+              { icon: Sparkles, label: 'Insight', desc: 'Entiendo tu situación y te explico lo que encontré', color: 'bg-accent/10 text-accent' },
+              { icon: CreditCard, label: 'Costos claros', desc: 'Ves exactamente cuánto cuesta, sin sorpresas', color: 'bg-chart-3/10 text-chart-3' },
+              { icon: CalendarCheck, label: 'Agenda', desc: 'Reserva con especialistas que entienden tu situación', color: 'bg-chart-4/10 text-chart-4' },
+            ].map((step, idx) => (
+              <div key={idx} className="relative group">
+                <Card className="p-6 border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-sm h-full fx-hover-lift">
+                  <div className={`w-12 h-12 ${step.color} rounded-2xl flex items-center justify-center mb-4`}>
+                    <step.icon className="w-5.5 h-5.5" />
                   </div>
-                  <h3 className="font-semibold text-foreground text-lg mb-2">{item.title}</h3>
-                  <p className="text-foreground/70 text-center text-sm text-balance">{item.desc}</p>
-                </div>
+                  <div className="text-xs font-medium text-muted-foreground mb-1.5">Paso {idx + 1}</div>
+                  <h3 className="font-semibold text-foreground text-lg mb-2">{step.label}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+                </Card>
                 {idx < 3 && (
-                  <div className="hidden md:block absolute top-8 -right-4 w-8 h-0.5 bg-border"></div>
+                  <div className="hidden md:block absolute top-1/2 -right-3 w-6 h-px bg-border" />
                 )}
               </div>
             ))}
@@ -181,25 +113,94 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-primary text-primary-foreground py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">¿Lista para Ser Escuchada?</h2>
-          <p className="text-lg text-primary-foreground/90 mb-8 max-w-2xl mx-auto text-balance">
-            Comienza tu evaluación confidencial hoy. Obtén claridad sobre tus síntomas y encuentra el cuidado adecuado para ti.
-          </p>
-          <Link href="/evaluar">
-            <Button size="lg" className="bg-primary-foreground hover:bg-primary-foreground/90 text-primary">
-              Comenzar Ahora
-            </Button>
-          </Link>
+      {/* Smart feature cards — airy, microinteractions */}
+      <section className="py-20 md:py-24">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">
+              Diseñado para ti, no para un sistema
+            </h2>
+            <p className="text-muted-foreground max-w-lg mx-auto text-balance">
+              Tecnología calmada al servicio de tu bienestar
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              {
+                icon: MessageCircle,
+                title: 'Conversacional',
+                desc: 'No hay formularios. Solo una conversación natural donde tú llevas el ritmo.',
+                badge: 'Voz + texto',
+              },
+              {
+                icon: CreditCard,
+                title: 'Costos transparentes',
+                desc: 'Ves el desglose real antes de decidir. Con opciones de pago que se adaptan a ti.',
+                badge: 'Sin sorpresas',
+              },
+              {
+                icon: Heart,
+                title: 'Cuidado compasivo',
+                desc: 'Especialistas en salud hormonal que entienden tu experiencia. Finalmente, alguien que escucha.',
+                badge: 'Verificados',
+              },
+            ].map((feature, idx) => (
+              <Card key={idx} className="p-7 border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-sm group fx-hover-lift">
+                <div className="flex items-start justify-between mb-5">
+                  <div className="w-11 h-11 bg-primary/8 rounded-2xl flex items-center justify-center group-hover:bg-primary/12 transition-colors">
+                    <feature.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <span className="text-[11px] font-medium bg-secondary text-secondary-foreground px-2.5 py-1 rounded-full">
+                    {feature.badge}
+                  </span>
+                </div>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border bg-background/50 py-8">
-        <div className="container mx-auto px-4 text-center text-foreground/60 text-sm">
-          <p>© 2025 HormonEquity. Todos los derechos reservados. Cuidado hormonal equitativo para todas.</p>
+      {/* CTA — warm, not aggressive */}
+      <section className="py-20 md:py-24">
+        <div className="max-w-2xl mx-auto px-6">
+          <Card className="p-10 md:p-14 text-center bg-primary/[0.04] border-primary/10 fx-shimmer-border">
+            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Heart className="w-7 h-7 text-primary fill-primary/20" />
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4 tracking-tight">
+              ¿Lista para ser escuchada?
+            </h2>
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed text-balance">
+              No necesitas saber qué tienes. Solo cuéntame cómo te sientes y juntas encontramos el camino.
+            </p>
+            <Link href="/evaluar">
+              <Button size="lg" className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-8 h-12 text-sm font-medium shadow-sm shadow-primary/20 hover:shadow-md hover:shadow-primary/25 transition-all">
+                Comenzar conversación
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </Link>
+            <div className="flex items-center justify-center gap-4 mt-6 text-xs text-muted-foreground/60">
+              <span className="flex items-center gap-1"><Shield className="w-3 h-3" /> Confidencial</span>
+              <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> 3 minutos</span>
+              <span className="flex items-center gap-1"><Mic className="w-3 h-3" /> Con voz</span>
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* Footer — minimal */}
+      <footer className="border-t border-border/50 py-8">
+        <div className="max-w-5xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <Heart className="w-4 h-4 text-primary/40 fill-primary/20" />
+            <span className="text-sm text-muted-foreground/60">HormonEquity</span>
+          </div>
+          <p className="text-xs text-muted-foreground/50">
+            No diagnosticamos. Te orientamos y conectamos con especialistas verificados.
+          </p>
         </div>
       </footer>
     </main>
