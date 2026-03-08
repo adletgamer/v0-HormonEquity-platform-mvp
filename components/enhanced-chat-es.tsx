@@ -7,6 +7,9 @@ import { Card } from '@/components/ui/card'
 import { Spinner } from '@/components/ui/spinner'
 import { SymptomProfile } from '@/lib/scoring-engine'
 import { ChatSessionData, ChatMessage } from '@/lib/types'
+import { triageSymptoms } from '@/lib/triage-engine'
+import { EmergencyWarning } from './emergency-warning'
+import type { TriageResult } from '@/lib/triage-engine'
 
 interface EnhancedChatEsProps {
   userId: string
@@ -92,6 +95,7 @@ export function EnhancedChatEs({ userId, onComplete, userName }: EnhancedChatEsP
   const [userInput, setUserInput] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [triageResult, setTriageResult] = useState<TriageResult | null>(null)
   const [sessionData, setSessionData] = useState<Partial<ChatSessionData>>({
     userId,
     name: userName || '',

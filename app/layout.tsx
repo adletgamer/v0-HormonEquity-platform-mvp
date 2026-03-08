@@ -7,8 +7,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'InSight Health - Cuidado de Perimenopausia para Mujeres',
-  description: 'Obtén orientación compasiva para perimenopausia y menopausia. Evaluación conversacional, costos transparentes y acceso a especialistas.',
+  title: 'HormonEquity - Cuidado Hormonal Equitativo para Mujeres LATAM',
+  description: 'Orientación compasiva para perimenopausia y menopausia en Latinoamérica. Evaluación segura, especialistas verificados, transparencia total.',
   generator: 'v0.app',
   icons: {
     icon: [

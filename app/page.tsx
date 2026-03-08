@@ -28,7 +28,7 @@ export default function Home() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Heart className="w-6 h-6 text-accent fill-accent" />
-            <span className="text-xl font-bold text-foreground">InSight Health</span>
+            <span className="text-xl font-bold text-foreground">HormonEquity</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <Link href="#about" className="text-foreground/70 hover:text-foreground transition">
@@ -242,7 +242,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-border bg-background/50 py-8">
         <div className="container mx-auto px-4 text-center text-foreground/60 text-sm">
-          <p>© 2024 InSight Health. Todos los derechos reservados. Diseñado con compasión para la salud de la mujer.</p>
+          <p>© 2024 HormonEquity. Todos los derechos reservados. Cuidado hormonal equitativo para todas.</p>
         </div>
       </footer>
     </main>
