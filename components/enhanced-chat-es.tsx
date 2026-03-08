@@ -285,12 +285,39 @@ export function EnhancedChatEs({ userId, onComplete, userName }: EnhancedChatEsP
 
   const handleCompleteEvaluation = async (data: Partial<ChatSessionData>) => {
     try {
+      // Calcular triage antes de enviar
+      const symptomDescriptions = data.symptoms || []
+      const severityScores = messages
+        .filter(m => m.role === 'user')
+        .slice(2) // Skip name and age
+        .map(m => {
+          const num = parseInt(m.content)
+          return isNaN(num) ? 0 : num
+        })
+
+      const triage = triageSymptoms(symptomDescriptions, severityScores)
+      setTriageResult(triage)
+
+      // Mostrar advertencia si es necesario
+      if (triage.severity !== 'opcional' && triage.severity !== 'recomendado') {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: '⚠️ Hemos detectado síntomas que requieren atención inmediata. Por favor, consulta a un profesional de salud.',
+            timestamp: new Date(),
+          },
+        ])
+      }
+
       const response = await fetch('/api/evaluacion/completar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           userId,
           sessionData: data,
+          triageResult: triage,
         }),
       })
 
@@ -332,6 +359,13 @@ export function EnhancedChatEs({ userId, onComplete, userName }: EnhancedChatEsP
           ></div>
         </div>
       </div>
+
+      {/* Emergency Warning */}
+      {triageResult && (
+        <div className="px-6 pt-2">
+          <EmergencyWarning triageResult={triageResult} />
+        </div>
+      )}
 
       {/* Chat Messages */}
       <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
