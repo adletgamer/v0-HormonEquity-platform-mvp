@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import ChatInterface from '@/components/chat-interface-es'
+import { EnhancedChatEs } from '@/components/enhanced-chat-es'
 import Link from 'next/link'
+import type { ChatSessionData } from '@/lib/types'
 
 export default function ProtectedHome() {
   const router = useRouter()
@@ -56,6 +57,21 @@ export default function ProtectedHome() {
     router.push('/')
   }
 
+  const handleChatComplete = (sessionData: ChatSessionData, recommendedRoutes: string[]) => {
+    // Guardar datos de sesión y redirigir a resultados
+    const routeScores = [
+      { routeId: 'teleorientacion', score: 75, reasoning: ['Síntomas leves', 'Consulta inicial'] },
+      { routeId: 'ginecologia', score: 65, reasoning: ['Evaluación completa'] },
+      { routeId: 'psicologia', score: 55, reasoning: ['Impacto emocional'] },
+    ]
+
+    const scoresParam = encodeURIComponent(JSON.stringify(routeScores))
+    const nameParam = encodeURIComponent(sessionData.name || '')
+    router.push(
+      `/protegido/resultados?scores=${scoresParam}&name=${nameParam}`
+    )
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex items-center justify-center">
@@ -78,18 +94,25 @@ export default function ProtectedHome() {
 
   if (showChat) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background">
-        <div className="max-w-4xl mx-auto">
-          <ChatInterface userId={user?.id} />
-          <div className="mt-4 flex justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex flex-col">
+        <div className="border-b border-border bg-white/50 backdrop-blur-md px-4 py-4">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <h1 className="text-xl font-bold text-foreground">Evaluación de Síntomas</h1>
             <Button
               variant="outline"
               onClick={() => setShowChat(false)}
               className="bg-white hover:bg-gray-50"
             >
-              Volver al Inicio
+              Cerrar
             </Button>
           </div>
+        </div>
+        <div className="flex-1 max-w-4xl mx-auto w-full">
+          <EnhancedChatEs
+            userId={user?.id}
+            userName={profile?.first_name}
+            onComplete={handleChatComplete}
+          />
         </div>
       </div>
     )
