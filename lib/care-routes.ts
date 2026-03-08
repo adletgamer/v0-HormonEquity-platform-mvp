@@ -141,3 +141,11 @@ export function getCareRoute(id: CareRouteId): CareRoute {
 export function getAllCareRoutes(): CareRoute[] {
   return Object.values(CARE_ROUTES)
 }
+
+export function formatCostRange(route: CareRoute): string {
+  const { costRange, currency } = route
+  if (typeof costRange === 'object' && costRange !== null && 'min' in costRange && 'max' in costRange) {
+    return `$${costRange.min}-${costRange.max} ${currency}`
+  }
+  return String(costRange)
+}

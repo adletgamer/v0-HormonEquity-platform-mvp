@@ -85,7 +85,7 @@ export default function SignUp() {
         <div className="p-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Crear Cuenta</h1>
           <p className="text-muted-foreground mb-6">
-            Únete a InSight Health y comienza tu camino hacia el bienestar
+            Únete a HormonEquity y comienza tu camino hacia el bienestar
           </p>
 
           {error && (

@@ -46,7 +46,7 @@ export default function Login() {
         <div className="p-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Ingresar</h1>
           <p className="text-muted-foreground mb-6">
-            Accede a tu cuenta en InSight Health
+            Accede a tu cuenta en HormonEquity
           </p>
 
           {error && (

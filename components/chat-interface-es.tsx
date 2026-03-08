@@ -21,12 +21,12 @@ interface ConversationData {
 }
 
 const STAGES = [
-  { id: 'inicio', prompt: '¡Hola! Soy tu asistente de salud de InSight. Para empezar, ¿cuál es tu nombre?' },
+  { id: 'inicio', prompt: '¡Hola! Soy tu asistente de salud de HormonEquity. Para empezar, ¿cuál es tu nombre?' },
   { id: 'edad', prompt: '¿Cuántos años tienes?' },
   { id: 'sintomas', prompt: '¿Cuáles son los síntomas que estás experimentando? Por favor, describelos.' },
   { id: 'antecedentes', prompt: '¿Tienes antecedentes médicos relevantes que debamos conocer? (Ej: diabetes, hipertensión, etc.)' },
   { id: 'medicamentos', prompt: '¿Estás tomando algún medicamento actualmente?' },
-  { id: 'objetivos', prompt: '¿Cuál es tu objetivo principal al usar InSight Health?' },
+  { id: 'objetivos', prompt: '¿Cuál es tu objetivo principal al usar HormonEquity?' },
   { id: 'confirmacion', prompt: '¡Perfecto! Resumamos tu información:' },
 ]
 
@@ -197,7 +197,7 @@ Con esta información, podemos ofrecerte:
       <Card className="h-[600px] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-primary/10 to-accent/10 p-4 border-b">
-          <h2 className="font-bold text-foreground">Evaluación de Salud - InSight Health</h2>
+          <h2 className="font-bold text-foreground">Evaluación de Salud - HormonEquity</h2>
           <p className="text-sm text-muted-foreground">
             Etapa {currentStage + 1} de {STAGES.length}
           </p>

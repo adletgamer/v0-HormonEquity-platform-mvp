@@ -57,15 +57,17 @@ export default function ProtectedHome() {
     router.push('/')
   }
 
-  const handleChatComplete = (sessionData: ChatSessionData, recommendedRoutes: string[]) => {
-    // Guardar datos de sesión y redirigir a resultados
-    const routeScores = [
-      { routeId: 'teleorientacion', score: 75, reasoning: ['Síntomas leves', 'Consulta inicial'] },
-      { routeId: 'ginecologia', score: 65, reasoning: ['Evaluación completa'] },
-      { routeId: 'psicologia', score: 55, reasoning: ['Impacto emocional'] },
-    ]
+  const handleChatComplete = (sessionData: ChatSessionData, recommendedRoutes: string[], routeScores?: { routeId: string; score: number; reasoning: string[] }[]) => {
+    // Usar scores reales del API o fallback para demo
+    const scores = routeScores && routeScores.length > 0
+      ? routeScores
+      : recommendedRoutes.map((id, i) => ({
+          routeId: id,
+          score: 80 - i * 10,
+          reasoning: ['Recomendación basada en tu evaluación'],
+        }))
 
-    const scoresParam = encodeURIComponent(JSON.stringify(routeScores))
+    const scoresParam = encodeURIComponent(JSON.stringify(scores))
     const nameParam = encodeURIComponent(sessionData.name || '')
     router.push(
       `/protegido/resultados?scores=${scoresParam}&name=${nameParam}`
@@ -123,7 +125,7 @@ export default function ProtectedHome() {
       {/* Header */}
       <div className="bg-white/50 backdrop-blur-md border-b border-border sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="text-2xl font-bold text-primary">InSight Health</div>
+          <div className="text-2xl font-bold text-primary">HormonEquity</div>
           <button
             onClick={handleLogout}
             className="px-4 py-2 text-sm font-medium text-primary hover:bg-primary/10 rounded-lg transition"
@@ -142,7 +144,7 @@ export default function ProtectedHome() {
               ¡Hola, {profile?.first_name || 'Amiga'}!
             </h1>
             <p className="text-lg text-muted-foreground">
-              Bienvenida a InSight Health, tu plataforma de salud integral para la perimenopausia y menopausia
+              Bienvenida a HormonEquity, tu plataforma de salud integral para la perimenopausia y menopausia
             </p>
           </div>
         </Card>
@@ -185,10 +187,10 @@ export default function ProtectedHome() {
 
         {/* About Section */}
         <Card className="p-8 mb-12">
-          <h2 className="text-2xl font-bold text-foreground mb-6">Sobre InSight Health</h2>
+          <h2 className="text-2xl font-bold text-foreground mb-6">Sobre HormonEquity</h2>
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <h3 className="font-semibold text-foreground mb-3">¿Por qué InSight Health?</h3>
+              <h3 className="font-semibold text-foreground mb-3">¿Por qué HormonEquity?</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-start">
                   <span className="text-accent mr-3">✓</span>
@@ -234,7 +236,7 @@ export default function ProtectedHome() {
 
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground">
-          <p>© 2024 InSight Health. Todos los derechos reservados.</p>
+          <p>© 2025 HormonEquity. Todos los derechos reservados.</p>
         </div>
       </div>
     </div>

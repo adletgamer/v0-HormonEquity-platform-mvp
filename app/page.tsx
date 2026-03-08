@@ -74,6 +74,9 @@ export default function Home() {
             <p className="text-lg text-foreground/80 mb-8 text-balance leading-relaxed">
               Obtén orientación personalizada para manejar síntomas de perimenopausia y menopausia. Conversaciones claras, costos transparentes y atención compasiva, todo desde tu compañera de salud de confianza.
             </p>
+            <p className="text-sm text-muted-foreground mb-6">
+              HormonEquity no diagnostica. Te orientamos y conectamos con especialistas verificados.
+            </p>
             <div className="flex flex-col sm:flex-row gap-4">
               {user ? (
                 <Link href="/protegido/inicio">
@@ -88,9 +91,11 @@ export default function Home() {
                   </Button>
                 </Link>
               )}
-              <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 w-full sm:w-auto">
-                Saber Más
-              </Button>
+              <Link href="#features">
+                <Button size="lg" variant="outline" className="border-primary text-primary hover:bg-primary/5 w-full sm:w-auto">
+                  Saber Más
+                </Button>
+              </Link>
             </div>
           </div>
           <div className="hidden md:grid grid-cols-2 gap-4">
@@ -131,7 +136,7 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              ¿Por Qué Elegir InSight?
+              ¿Por Qué Elegir HormonEquity?
             </h2>
             <p className="text-lg text-foreground/70 max-w-2xl mx-auto text-balance">
               Creado específicamente para mujeres que navegan la perimenopausia con características diseñadas para apoyar tu viaje de salud
@@ -242,7 +247,7 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-border bg-background/50 py-8">
         <div className="container mx-auto px-4 text-center text-foreground/60 text-sm">
-          <p>© 2024 HormonEquity. Todos los derechos reservados. Cuidado hormonal equitativo para todas.</p>
+          <p>© 2025 HormonEquity. Todos los derechos reservados. Cuidado hormonal equitativo para todas.</p>
         </div>
       </footer>
     </main>

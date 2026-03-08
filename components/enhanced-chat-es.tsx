@@ -13,7 +13,7 @@ import type { TriageResult } from '@/lib/triage-engine'
 
 interface EnhancedChatEsProps {
   userId: string
-  onComplete: (sessionData: ChatSessionData, recommendedRoutes: string[]) => void
+  onComplete: (sessionData: ChatSessionData, recommendedRoutes: string[], routeScores?: { routeId: string; score: number; reasoning: string[] }[]) => void
   userName?: string
 }
 
@@ -324,7 +324,7 @@ export function EnhancedChatEs({ userId, onComplete, userName }: EnhancedChatEsP
       if (!response.ok) throw new Error('Error al completar evaluación')
 
       const result = await response.json()
-      onComplete(result.sessionData, result.recommendedRoutes)
+      onComplete(result.sessionData, result.recommendedRoutes, result.routeScores)
     } catch (error) {
       console.error('Error:', error)
       setMessages((prev) => [

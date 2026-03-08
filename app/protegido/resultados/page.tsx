@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { CareRouteCard } from '@/components/care-route-card'
-import { CARE_ROUTES } from '@/lib/care-routes'
+import { CARE_ROUTES, formatCostRange } from '@/lib/care-routes'
 import { Spinner } from '@/components/ui/spinner'
 import Link from 'next/link'
 
@@ -104,7 +104,7 @@ function ResultadosContent() {
                       </p>
                       <p className="text-sm">
                         <span className="font-semibold text-foreground">Costo aproximado:</span>{' '}
-                        {CARE_ROUTES[topRecommendation.routeId as keyof typeof CARE_ROUTES].costRange}
+                        {formatCostRange(CARE_ROUTES[topRecommendation.routeId as keyof typeof CARE_ROUTES])}
                       </p>
                     </div>
                     {topRecommendation.reasoning && topRecommendation.reasoning.length > 0 && (
@@ -154,7 +154,7 @@ function ResultadosContent() {
                       <span className="font-semibold text-foreground">Duración:</span> {route.duration}
                     </p>
                     <p>
-                      <span className="font-semibold text-foreground">Costo:</span> {route.costRange}
+                      <span className="font-semibold text-foreground">Costo:</span> {formatCostRange(route)}
                     </p>
                   </div>
                   <Button

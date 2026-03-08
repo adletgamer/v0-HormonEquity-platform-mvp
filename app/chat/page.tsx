@@ -1,8 +1,8 @@
 import ChatInterface from '@/components/chat-interface';
 
 export const metadata = {
-  title: 'Health Assessment | InSight Health',
-  description: 'Start your personalized health assessment with InSight Health',
+  title: 'Evaluación de Síntomas | HormonEquity',
+  description: 'Comienza tu evaluación personalizada con HormonEquity',
 };
 
 export default function ChatPage() {
