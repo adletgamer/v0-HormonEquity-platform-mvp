@@ -37,23 +37,23 @@ interface StepOption {
 
 // --- Step Definitions ---
 const SYMPTOM_OPTIONS: StepOption[] = [
-  { label: 'Sofocos o sudores', value: 'sofocos', emoji: '\uD83D\uDD25' },
-  { label: 'Cambios en el ciclo', value: 'cambios_menstruales', emoji: '\uD83D\uDCC5' },
-  { label: 'Insomnio o mal sue\u00f1o', value: 'insomnio', emoji: '\uD83C\uDF19' },
-  { label: 'Fatiga o agotamiento', value: 'fatiga', emoji: '\uD83D\uDE34' },
-  { label: 'Cambios de humor', value: 'cambios_humor', emoji: '\uD83C\uDFAD' },
-  { label: 'Ansiedad o irritabilidad', value: 'depresion_ansiedad', emoji: '\uD83D\uDCAD' },
-  { label: 'Niebla mental', value: 'niebla_mental', emoji: '\uD83C\uDF2B\uFE0F' },
-  { label: 'Ganancia de peso', value: 'ganancia_peso', emoji: '\u2696\uFE0F' },
-  { label: 'Sequedad vaginal', value: 'sequedad_vaginal', emoji: '\uD83D\uDCA7' },
-  { label: 'Dolor p\u00e9lvico', value: 'dolor_pelvico', emoji: '\uD83E\uDE7A' },
+  { label: 'Sofocos o sudores', value: 'sofocos', emoji: '🔥' },
+  { label: 'Cambios en el ciclo', value: 'cambios_menstruales', emoji: '📅' },
+  { label: 'Insomnio o mal sueño', value: 'insomnio', emoji: '🌙' },
+  { label: 'Fatiga o agotamiento', value: 'fatiga', emoji: '😴' },
+  { label: 'Cambios de humor', value: 'cambios_humor', emoji: '🎭' },
+  { label: 'Ansiedad o irritabilidad', value: 'depresion_ansiedad', emoji: '💭' },
+  { label: 'Niebla mental', value: 'niebla_mental', emoji: '🌫️' },
+  { label: 'Ganancia de peso', value: 'ganancia_peso', emoji: '⚖️' },
+  { label: 'Sequedad vaginal', value: 'sequedad_vaginal', emoji: '💧' },
+  { label: 'Dolor pélvico', value: 'dolor_pelvico', emoji: '🩺' },
 ]
 
 const AGE_OPTIONS: StepOption[] = [
-  { label: '35\u201339', value: '35-39' },
-  { label: '40\u201344', value: '40-44' },
-  { label: '45\u201349', value: '45-49' },
-  { label: '50\u201354', value: '50-54' },
+  { label: '35–39', value: '35-39' },
+  { label: '40–44', value: '40-44' },
+  { label: '45–49', value: '45-49' },
+  { label: '50–54', value: '50-54' },
   { label: '55+', value: '55+' },
 ]
 
@@ -61,7 +61,7 @@ const DURATION_OPTIONS: StepOption[] = [
   { label: 'Menos de 3 meses', value: 'menos_3' },
   { label: '3 a 6 meses', value: '3_6' },
   { label: '6 a 12 meses', value: '6_12' },
-  { label: 'M\u00e1s de 1 a\u00f1o', value: 'mas_12' },
+  { label: 'Más de 1 año', value: 'mas_12' },
 ]
 
 const IMPACT_OPTIONS: StepOption[] = [
@@ -72,31 +72,31 @@ const IMPACT_OPTIONS: StepOption[] = [
 ]
 
 const MODALITY_OPTIONS: StepOption[] = [
-  { label: 'Virtual', value: 'virtual', emoji: '\uD83D\uDCBB' },
-  { label: 'Presencial', value: 'presencial', emoji: '\uD83C\uDFE5' },
-  { label: 'Cualquiera', value: 'cualquiera', emoji: '\u2728' },
+  { label: 'Virtual', value: 'virtual', emoji: '💻' },
+  { label: 'Presencial', value: 'presencial', emoji: '🏥' },
+  { label: 'Cualquiera', value: 'cualquiera', emoji: '✨' },
 ]
 
 const BUDGET_OPTIONS: StepOption[] = [
   { label: 'Menos de S/150', value: 'bajo' },
-  { label: 'S/150 \u2013 S/400', value: 'medio' },
-  { label: 'S/400 \u2013 S/800', value: 'alto' },
+  { label: 'S/150 – S/400', value: 'medio' },
+  { label: 'S/400 – S/800', value: 'alto' },
   { label: 'Lo que sea necesario', value: 'flexible' },
 ]
 
 const STEP_TYPES: StepType[] = ['name', 'age', 'symptoms', 'duration', 'sleep', 'work', 'emotional', 'first_time', 'modality', 'budget']
 
 const STEP_MESSAGES: Record<StepType, string> = {
-  name: 'Hola. Soy el asistente de HormonEquity.\n\nPuedes contarme qu\u00e9 s\u00edntomas est\u00e1s sintiendo o c\u00f3mo te has estado sintiendo \u00faltimamente.\n\nPrimero, \u00bfc\u00f3mo te llamas?',
+  name: 'Hola. Soy el asistente de HormonEquity.\n\nPuedes contarme qué síntomas estás sintiendo o cómo te has estado sintiendo últimamente.\n\nPrimero, ¿cómo te llamas?',
   age: '',
   symptoms: '',
-  duration: '\u00bfHace cu\u00e1nto tiempo empezaste a notar estos cambios?',
-  sleep: '\u00bfC\u00f3mo est\u00e1 afectando tu descanso?',
-  work: '\u00bfY en tu d\u00eda a d\u00eda — trabajo, actividades?',
-  emotional: '\u00bfC\u00f3mo te ha afectado emocionalmente?',
-  first_time: '\u00bfEs la primera vez que buscas orientaci\u00f3n para esto?',
-  modality: '\u00bfC\u00f3mo preferir\u00edas recibir atenci\u00f3n?',
-  budget: '\u00bfCu\u00e1l es tu presupuesto aproximado para este primer paso?',
+  duration: '¿Hace cuánto tiempo empezaste a notar estos cambios?',
+  sleep: '¿Cómo está afectando tu descanso?',
+  work: '¿Y en tu día a día — trabajo, actividades?',
+  emotional: '¿Cómo te ha afectado emocionalmente?',
+  first_time: '¿Es la primera vez que buscas orientación para esto?',
+  modality: '¿Cómo preferirías recibir atención?',
+  budget: '¿Cuál es tu presupuesto aproximado para este primer paso?',
 }
 
 interface CareNavigatorProps {
@@ -199,14 +199,14 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
         setResult(prev => ({ ...prev, name }))
         addUserMessage(name)
         setTimeout(() => {
-          addAssistantMessage(`Encantada de conocerte, ${name}.\n\n\u00bfEn qu\u00e9 rango de edad te encuentras?`)
+          addAssistantMessage(`Encantada de conocerte, ${name}.\n\n¿En qué rango de edad te encuentras?`)
           setCurrentStep(1)
         }, 200)
         break
       }
       case 'age':
         setResult(prev => ({ ...prev, ageRange: value }))
-        advanceStep(label, `Gracias, ${result.name}. Cu\u00e9ntame, \u00bfqu\u00e9 s\u00edntomas has notado? Puedes elegir varios o describirmelos con tus palabras.`)
+        advanceStep(label, `Gracias, ${result.name}. Cuéntame, ¿qué síntomas has notado? Puedes elegir varios o describirmelos con tus palabras.`)
         break
       case 'duration':
         setResult(prev => ({ ...prev, duration: value }))
@@ -249,7 +249,7 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
         setCompleted(true)
         // Voice summarization
         const sympLabels = (result.selectedSymptoms || []).map(v => SYMPTOM_OPTIONS.find(o => o.value === v)?.label || v)
-        const summaryMsg = `Gracias por compartir, ${result.name}. Lo que entiendo es que tus s\u00edntomas \u2014 ${sympLabels.slice(0, 3).join(', ')} \u2014 est\u00e1n afectando tu d\u00eda a d\u00eda. Estoy preparando la mejor ruta de cuidado para ti...`
+        const summaryMsg = `Gracias por compartir, ${result.name}. Lo que entiendo es que tus síntomas — ${sympLabels.slice(0, 3).join(', ')} — están afectando tu día a día. Estoy preparando la mejor ruta de cuidado para ti...`
         setTimeout(() => {
           addAssistantMessage(summaryMsg)
           setTimeout(() => onComplete(finalResult), 2000)
@@ -273,7 +273,7 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
         const merged = [...new Set([...selectedSymptoms, ...sympResult.matched])]
         setSelectedSymptoms(merged)
         setTimeout(() => {
-          addAssistantMessage(`Detect\u00e9: ${sympResult.labels.join(', ')}. Los agregu\u00e9 a tu selecci\u00f3n. \u00bfQuieres agregar m\u00e1s o presiona \u201cContinuar\u201d?`)
+          addAssistantMessage(`Detecté: ${sympResult.labels.join(', ')}. Los agregué a tu selección. ¿Quieres agregar más o presiona "Continuar"?`)
         }, 200)
         return
       }
@@ -294,7 +294,7 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
 
   // --- Button handlers ---
   const handleOption = (opt: StepOption) => applyStepValue(opt.value, opt.label)
-  const handleFirstTime = (isFirst: boolean) => applyStepValue(String(isFirst), isFirst ? 'S\u00ed, es mi primera vez' : 'No, ya he buscado antes')
+  const handleFirstTime = (isFirst: boolean) => applyStepValue(String(isFirst), isFirst ? 'Sí, es mi primera vez' : 'No, ya he buscado antes')
 
   const handleSymptomsConfirm = () => {
     if (selectedSymptoms.length === 0) return
@@ -346,7 +346,7 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
               HormonEquity
             </h1>
             <p className="text-muted-foreground mb-10 leading-relaxed text-balance">
-              Cu\u00e9ntame c\u00f3mo te has sentido \u00faltimamente. Puedes hablarme o escribirme.
+              Cuéntame cómo te has sentido últimamente. Puedes hablarme o escribirme.
             </p>
 
             <div className="space-y-3">
@@ -494,7 +494,7 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
                 {selectedSymptoms.length > 0 && (
                   <Button onClick={handleSymptomsConfirm}
                     className="w-full rounded-xl bg-primary hover:bg-primary/90 h-11 text-sm font-medium">
-                    Continuar con {selectedSymptoms.length} s\u00edntoma{selectedSymptoms.length > 1 ? 's' : ''}
+                    Continuar con {selectedSymptoms.length} síntoma{selectedSymptoms.length > 1 ? 's' : ''}
                   </Button>
                 )}
               </div>
@@ -527,7 +527,7 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
               <div className="flex gap-2">
                 <button onClick={() => handleFirstTime(true)}
                   className="flex-1 px-4 py-2.5 rounded-full text-sm border border-border/60 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all">
-                  S\u00ed, primera vez
+                  Sí, primera vez
                 </button>
                 <button onClick={() => handleFirstTime(false)}
                   className="flex-1 px-4 py-2.5 rounded-full text-sm border border-border/60 bg-card text-foreground hover:border-primary/40 hover:bg-primary/5 transition-all">
