@@ -57,26 +57,82 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    const symptoms = Array.isArray(sessionData.symptoms) ? sessionData.symptoms : []
+    const durationMonths = symptoms.reduce(
+      (max: number, sym: any) => Math.max(max, Number(sym?.duration_months) || 0),
+      0,
+    )
+
+    const sleepImpact = Number(
+      symptoms.find((sym: any) => sym?.symptom === 'insomnio')?.severity || 0,
+    )
+
+    const emotionalSignals = symptoms.filter((sym: any) =>
+      ['cambios_humor', 'depresion_ansiedad', 'niebla_mental'].includes(sym?.symptom),
+    )
+    const emotionalImpact = emotionalSignals.length
+      ? Math.round(
+          emotionalSignals.reduce(
+            (acc: number, sym: any) => acc + (Number(sym?.severity) || 0),
+            0,
+          ) / emotionalSignals.length,
+        )
+      : 0
+
+    const workImpact = Number(sessionData.impactOnLife || 0)
+    const topSymptomsText = symptoms
+      .filter((sym: any) => Number(sym?.severity) > 0)
+      .sort((a: any, b: any) => Number(b?.severity || 0) - Number(a?.severity || 0))
+      .slice(0, 4)
+      .map((sym: any) => `${sym.symptom} (${sym.severity}/10)`)
+      .join(', ')
+
+    const summaryGenerated = topSymptomsText
+      ? `Síntomas predominantes: ${topSymptomsText}.`
+      : 'No se registraron síntomas con severidad mayor a 0.'
+
     // Calcular recomendaciones
     const routeScores = scoreRoutes(symptomProfile)
     const topRoutes = routeScores.slice(0, 3).map((r) => r.routeId)
 
-    // Guardar evaluación en base de datos
-    const { data, error } = await supabase
-      .from('chat_sessions')
+    // Guardar sesión base del intake
+    const { data: sessionRow, error: sessionError } = await supabase
+      .from('symptom_sessions')
       .insert({
         user_id: userId,
-        symptom_summary: JSON.stringify(sessionData.symptoms || []),
-        medical_history: sessionData.medicalHistory?.join(', ') || '',
-        medications: sessionData.medications?.join(', ') || '',
-        goals: sessionData.goals?.join(', ') || '',
+        symptoms,
+        sleep_impact: sleepImpact,
+        work_impact: workImpact,
+        emotional_impact: emotionalImpact,
+        duration_months: durationMonths,
+        summary_generated: summaryGenerated,
       })
-      .select()
+      .select('id')
+      .single()
 
-    if (error) {
-      console.error('Database error:', error)
+    if (sessionError) {
+      console.error('Database error creating symptom_sessions:', sessionError)
       return NextResponse.json(
-        { error: 'Error saving evaluation' },
+        { error: 'Error saving symptom session' },
+        { status: 500 }
+      )
+    }
+
+    const recommendationsPayload = routeScores.slice(0, 3).map((score) => ({
+      session_id: sessionRow.id,
+      route_type: score.routeId,
+      explanation: score.reasoning.join('. '),
+      confidence_score: score.score,
+    }))
+
+    const { error: recommendationsError } = await supabase
+      .from('recommendations')
+      .insert(recommendationsPayload)
+
+    if (recommendationsError) {
+      console.error('Database error creating recommendations:', recommendationsError)
+      return NextResponse.json(
+        { error: 'Error saving recommendations' },
         { status: 500 }
       )
     }
@@ -86,7 +142,7 @@ export async function POST(request: NextRequest) {
         success: true,
         sessionData: {
           ...sessionData,
-          id: data?.[0]?.id || '',
+          id: sessionRow?.id || '',
           completed: true,
           recommendedRoutes: topRoutes,
           createdAt: new Date(),

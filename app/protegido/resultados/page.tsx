@@ -8,6 +8,7 @@ import { CareRouteCard } from '@/components/care-route-card'
 import { CARE_ROUTES, formatCostRange } from '@/lib/care-routes'
 import { Spinner } from '@/components/ui/spinner'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 interface RouteScore {
   routeId: string
@@ -15,16 +16,30 @@ interface RouteScore {
   reasoning: string[]
 }
 
+interface CareRouteDbRow {
+  id: string
+  name?: string
+  description?: string
+  duration?: string
+  min_cost?: number
+  max_cost?: number
+  currency?: string
+}
+
 function ResultadosContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const supabase = createClient()
   const [routeScores, setRouteScores] = useState<RouteScore[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [userName, setUserName] = useState('')
+  const [sessionId, setSessionId] = useState('')
+  const [catalogById, setCatalogById] = useState<Record<string, CareRouteDbRow>>({})
 
   useEffect(() => {
     const scoresParam = searchParams.get('scores')
     const nameParam = searchParams.get('name')
+    const sessionIdParam = searchParams.get('sessionId')
 
     if (scoresParam) {
       try {
@@ -39,13 +54,68 @@ function ResultadosContent() {
       setUserName(decodeURIComponent(nameParam))
     }
 
+    if (sessionIdParam) {
+      setSessionId(decodeURIComponent(sessionIdParam))
+    }
+
     setIsLoading(false)
   }, [searchParams])
 
+  useEffect(() => {
+    let active = true
+
+    const loadCareRoutes = async () => {
+      const { data, error } = await supabase.from('care_routes').select('*')
+      if (error) {
+        console.warn('No se pudo leer care_routes desde Supabase, usando catálogo local.', error.message)
+        return
+      }
+
+      if (!active || !Array.isArray(data)) return
+
+      const mapped = data.reduce<Record<string, CareRouteDbRow>>((acc, row: any) => {
+        if (row?.id) {
+          acc[row.id] = row as CareRouteDbRow
+        }
+        return acc
+      }, {})
+
+      setCatalogById(mapped)
+    }
+
+    loadCareRoutes()
+    return () => {
+      active = false
+    }
+  }, [supabase])
+
   const topRecommendation = routeScores[0]
 
+  const getRouteInfo = (routeId: string) => {
+    const localRoute = CARE_ROUTES[routeId as keyof typeof CARE_ROUTES]
+    const dbRoute = catalogById[routeId]
+
+    if (!dbRoute) return localRoute
+    if (!localRoute) return null
+
+    return {
+      ...localRoute,
+      name: dbRoute.name || localRoute.name,
+      description: dbRoute.description || localRoute.description,
+      duration: dbRoute.duration || localRoute.duration,
+      currency: dbRoute.currency || localRoute.currency,
+      costRange: {
+        min: Number(dbRoute.min_cost ?? localRoute.costRange.min),
+        max: Number(dbRoute.max_cost ?? localRoute.costRange.max),
+      },
+    }
+  }
+
   const handleSelectRoute = (routeId: string) => {
-    router.push(`/protegido/reservar?ruta=${routeId}`)
+    const query = sessionId
+      ? `/protegido/reservar?ruta=${routeId}&sessionId=${encodeURIComponent(sessionId)}`
+      : `/protegido/reservar?ruta=${routeId}`
+    router.push(query)
   }
 
   if (isLoading) {
@@ -89,22 +159,28 @@ function ResultadosContent() {
             </div>
             <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-accent/5 p-6">
               <div className="space-y-4">
-                {CARE_ROUTES[topRecommendation.routeId as keyof typeof CARE_ROUTES] && (
+                {getRouteInfo(topRecommendation.routeId) && (
                   <div>
+                    {(() => {
+                      const route = getRouteInfo(topRecommendation.routeId)
+                      if (!route) return null
+
+                      return (
+                        <>
                     <h3 className="text-2xl font-bold text-foreground mb-2">
-                      {CARE_ROUTES[topRecommendation.routeId as keyof typeof CARE_ROUTES].name}
+                      {route.name}
                     </h3>
                     <p className="text-muted-foreground mb-4">
-                      {CARE_ROUTES[topRecommendation.routeId as keyof typeof CARE_ROUTES].description}
+                      {route.description}
                     </p>
                     <div className="space-y-2 mb-4">
                       <p className="text-sm">
                         <span className="font-semibold text-foreground">Duración:</span>{' '}
-                        {CARE_ROUTES[topRecommendation.routeId as keyof typeof CARE_ROUTES].duration}
+                        {route.duration}
                       </p>
                       <p className="text-sm">
                         <span className="font-semibold text-foreground">Costo aproximado:</span>{' '}
-                        {formatCostRange(CARE_ROUTES[topRecommendation.routeId as keyof typeof CARE_ROUTES])}
+                        {formatCostRange(route)}
                       </p>
                     </div>
                     {topRecommendation.reasoning && topRecommendation.reasoning.length > 0 && (
@@ -121,8 +197,11 @@ function ResultadosContent() {
                       className="w-full mt-6 bg-primary hover:bg-primary/90 text-white"
                       onClick={() => handleSelectRoute(topRecommendation.routeId)}
                     >
-                      Solicitar {CARE_ROUTES[topRecommendation.routeId as keyof typeof CARE_ROUTES].name}
+                      Solicitar {route.name}
                     </Button>
+                        </>
+                      )
+                    })()}
                   </div>
                 )}
               </div>
@@ -135,7 +214,7 @@ function ResultadosContent() {
           <h2 className="text-2xl font-bold text-foreground mb-6">Todas las Opciones de Cuidado</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {routeScores.map((score, idx) => {
-              const route = CARE_ROUTES[score.routeId as keyof typeof CARE_ROUTES]
+              const route = getRouteInfo(score.routeId)
               if (!route) return null
               return (
                 <Card

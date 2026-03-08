@@ -1,11 +1,12 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Heart, MessageCircle, Mic, Sparkles, ArrowRight, Shield, Clock, CreditCard, CalendarCheck } from 'lucide-react'
+import { Heart, MessageCircle, Mic, Sparkles, ArrowRight, Shield, Clock, CreditCard, Stethoscope } from 'lucide-react'
+import { RevealOnScroll } from '@/components/reveal-on-scroll'
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-background fx-grain">
+    <main className="min-h-screen bg-gradient-to-br from-background via-primary/[0.05] to-accent/[0.08] fx-grain">
       {/* Header — minimal, breathable */}
       <header className="bg-background/80 backdrop-blur-md sticky top-0 z-50 border-b border-border/50">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -15,17 +16,35 @@ export default function Home() {
             </div>
             <span className="text-lg font-semibold text-foreground tracking-tight">HormonEquity</span>
           </Link>
-          <Link href="/evaluar">
-            <Button className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-6 h-10 text-sm font-medium shadow-sm shadow-primary/20 transition-all hover:shadow-md hover:shadow-primary/25">
-              Comenzar
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link href="/auth/ingresar">
+              <Button
+                variant="ghost"
+                className="rounded-full h-11 px-5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/60 border border-transparent hover:border-border/70 transition-all duration-300"
+              >
+                Ingresar
+              </Button>
+            </Link>
+            <Link href="/auth/registrarse">
+              <Button
+                variant="outline"
+                className="rounded-full h-11 px-5 text-sm font-medium border-accent/30 bg-accent/[0.08] text-accent hover:bg-accent/[0.14] hover:border-accent/50 shadow-sm transition-all duration-300"
+              >
+                Registrarte
+              </Button>
+            </Link>
+            <Link href="/evaluar">
+              <Button className="rounded-full h-11 px-6 sm:px-7 text-sm font-semibold bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm shadow-primary/20 transition-all duration-300 hover:shadow-md hover:shadow-primary/30 fx-shimmer-border">
+                Comenzar
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Hero — conversational-first, centered, calm */}
       <section className="relative overflow-hidden fx-aurora">
-        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.04] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-sky-100/50 via-violet-100/20 to-transparent" />
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[68vw] h-[68vw] max-w-[760px] max-h-[760px] rounded-full bg-primary/[0.06] blur-3xl animate-aurora-float" />
           <div className="absolute top-24 -right-24 w-[42vw] h-[42vw] max-w-[460px] max-h-[460px] rounded-full bg-accent/[0.08] blur-3xl animate-drift-x" />
@@ -38,7 +57,7 @@ export default function Home() {
             </div>
           </div>
 
-          <h1 className="text-4xl md:text-[3.25rem] font-bold text-foreground mb-6 leading-tight tracking-tight animate-fade-up delay-100 text-balance">
+          <h1 className="font-display text-4xl md:text-[3.25rem] font-bold text-foreground mb-6 leading-tight tracking-tight animate-fade-up delay-100 text-balance">
             Cuéntame cómo te has sentido últimamente
           </h1>
 
@@ -70,17 +89,17 @@ export default function Home() {
             </Link>
           </div>
 
-          <p className="text-xs text-muted-foreground/60 mt-6 animate-fade-up delay-400">
+          <p className="text-xs text-muted-foreground/70 mt-6 animate-fade-up delay-400">
             Conversación gratuita · Sin registro · 3 minutos
           </p>
         </div>
       </section>
 
-      {/* Progressive disclosure: How it works — 4 layers */}
-      <section className="py-20 md:py-24 bg-card/50">
+      {/* Progressive disclosure: How it works — 3 simple steps */}
+      <RevealOnScroll className="py-20 md:py-24 bg-card/50" delayMs={70}>
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-14">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">
               Tu camino hacia la claridad
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-balance">
@@ -88,36 +107,35 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             {[
-              { icon: MessageCircle, label: 'Conversa', desc: 'Cuéntame qué síntomas estás sintiendo, con voz o texto', color: 'bg-primary/10 text-primary' },
-              { icon: Sparkles, label: 'Insight', desc: 'Entiendo tu situación y te explico lo que encontré', color: 'bg-accent/10 text-accent' },
-              { icon: CreditCard, label: 'Costos claros', desc: 'Ves exactamente cuánto cuesta, sin sorpresas', color: 'bg-chart-3/10 text-chart-3' },
-              { icon: CalendarCheck, label: 'Agenda', desc: 'Reserva con especialistas que entienden tu situación', color: 'bg-chart-4/10 text-chart-4' },
+              { icon: MessageCircle, label: 'Paso 1', desc: 'Habla o escribe cómo te sientes.', color: 'bg-primary/10 text-primary' },
+              { icon: Sparkles, label: 'Paso 2', desc: 'Recibe orientación personalizada.', color: 'bg-accent/10 text-accent' },
+              { icon: Stethoscope, label: 'Paso 3', desc: 'Conéctate con el cuidado adecuado.', color: 'bg-emerald-100 text-emerald-700' },
             ].map((step, idx) => (
               <div key={idx} className="relative group">
-                <Card className="p-6 border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-sm h-full fx-hover-lift">
+                <Card className="p-6 border-border/60 hover:border-primary/25 transition-all duration-300 hover:shadow-md h-full fx-hover-lift">
                   <div className={`w-12 h-12 ${step.color} rounded-2xl flex items-center justify-center mb-4`}>
                     <step.icon className="w-5.5 h-5.5" />
                   </div>
-                  <div className="text-xs font-medium text-muted-foreground mb-1.5">Paso {idx + 1}</div>
-                  <h3 className="font-semibold text-foreground text-lg mb-2">{step.label}</h3>
+                  <div className="text-xs font-medium text-muted-foreground mb-1.5">{step.label}</div>
+                  <h3 className="font-display font-semibold text-foreground text-lg mb-2">{step.desc}</h3>
                   <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                 </Card>
-                {idx < 3 && (
+                {idx < 2 && (
                   <div className="hidden md:block absolute top-1/2 -right-3 w-6 h-px bg-border" />
                 )}
               </div>
             ))}
           </div>
         </div>
-      </section>
+      </RevealOnScroll>
 
       {/* Smart feature cards — airy, microinteractions */}
-      <section className="py-20 md:py-24">
+      <RevealOnScroll className="py-20 md:py-24" delayMs={120}>
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-14">
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3 tracking-tight">
               Diseñado para ti, no para un sistema
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto text-balance">
@@ -146,7 +164,7 @@ export default function Home() {
                 badge: 'Verificados',
               },
             ].map((feature, idx) => (
-              <Card key={idx} className="p-7 border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-sm group fx-hover-lift">
+              <Card key={idx} className="p-7 border-border/50 hover:border-primary/20 transition-all duration-300 hover:shadow-md group fx-hover-lift">
                 <div className="flex items-start justify-between mb-5">
                   <div className="w-11 h-11 bg-primary/8 rounded-2xl flex items-center justify-center group-hover:bg-primary/12 transition-colors">
                     <feature.icon className="w-5 h-5 text-primary" />
@@ -155,29 +173,29 @@ export default function Home() {
                     {feature.badge}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
+                <h3 className="font-display text-lg font-semibold text-foreground mb-2">{feature.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{feature.desc}</p>
               </Card>
             ))}
           </div>
         </div>
-      </section>
+      </RevealOnScroll>
 
       {/* CTA — warm, not aggressive */}
-      <section className="py-20 md:py-24">
+      <RevealOnScroll className="py-20 md:py-24" delayMs={140}>
         <div className="max-w-2xl mx-auto px-6">
           <Card className="p-10 md:p-14 text-center bg-primary/[0.04] border-primary/10 fx-shimmer-border">
             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
               <Heart className="w-7 h-7 text-primary fill-primary/20" />
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-4 tracking-tight">
+            <h2 className="font-display text-2xl md:text-3xl font-bold text-foreground mb-4 tracking-tight">
               ¿Lista para ser escuchada?
             </h2>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed text-balance">
               No necesitas saber qué tienes. Solo cuéntame cómo te sientes y juntas encontramos el camino.
             </p>
             <Link href="/evaluar">
-              <Button size="lg" className="rounded-full bg-primary hover:bg-primary/90 text-primary-foreground px-8 h-12 text-sm font-medium shadow-sm shadow-primary/20 hover:shadow-md hover:shadow-primary/25 transition-all">
+              <Button size="lg" className="rounded-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground px-8 text-sm font-medium shadow-sm shadow-primary/20 hover:shadow-md hover:shadow-primary/25 transition-all">
                 Comenzar conversación
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
@@ -189,7 +207,7 @@ export default function Home() {
             </div>
           </Card>
         </div>
-      </section>
+      </RevealOnScroll>
 
       {/* Footer — minimal */}
       <footer className="border-t border-border/50 py-8">

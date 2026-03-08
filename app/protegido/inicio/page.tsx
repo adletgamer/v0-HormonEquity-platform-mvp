@@ -69,8 +69,9 @@ export default function ProtectedHome() {
 
     const scoresParam = encodeURIComponent(JSON.stringify(scores))
     const nameParam = encodeURIComponent(sessionData.name || '')
+    const sessionIdParam = encodeURIComponent(sessionData.id || '')
     router.push(
-      `/protegido/resultados?scores=${scoresParam}&name=${nameParam}`
+      `/protegido/resultados?scores=${scoresParam}&name=${nameParam}&sessionId=${sessionIdParam}`
     )
   }
 

@@ -8,6 +8,28 @@ import { Input } from '@/components/ui/input'
 import { Card } from '@/components/ui/card'
 import Link from 'next/link'
 
+function mapSignUpError(errorMessage: string): string {
+  const msg = errorMessage.toLowerCase()
+
+  if (msg.includes('failed to fetch') || msg.includes('network')) {
+    return 'No pudimos conectar con Supabase. Verifica tu NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en .env.local, y que el proyecto esté activo.'
+  }
+
+  if (msg.includes('failed to check') || msg.includes('captcha')) {
+    return 'El registro está bloqueado por verificación anti-bot (captcha). En Supabase Auth, desactiva captcha temporalmente o integra captcha token en el frontend.'
+  }
+
+  if (msg.includes('redirect') || msg.includes('not allowed')) {
+    return 'La URL de redirección no está permitida. Agrega tu URL local (ej: http://localhost:3000/*) en Supabase > Authentication > URL Configuration.'
+  }
+
+  if (msg.includes('already registered') || msg.includes('already been registered')) {
+    return 'Este correo ya está registrado. Intenta ingresar o usar otro correo.'
+  }
+
+  return errorMessage
+}
+
 export default function SignUp() {
   const router = useRouter()
   const supabase = createClient()
@@ -39,6 +61,12 @@ export default function SignUp() {
       return
     }
 
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      setError('Falta configuración de Supabase en .env.local (URL o ANON KEY).')
+      setLoading(false)
+      return
+    }
+
     try {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
@@ -54,7 +82,7 @@ export default function SignUp() {
       })
 
       if (signUpError) {
-        setError(signUpError.message)
+        setError(mapSignUpError(signUpError.message))
       } else if (data.user) {
         // Crear perfil en la tabla profiles
         const { error: profileError } = await supabase
@@ -73,7 +101,7 @@ export default function SignUp() {
         router.push('/auth/registrarse-exito')
       }
     } catch (err: any) {
-      setError(err.message || 'Error al registrarse')
+      setError(mapSignUpError(err?.message || 'Error al registrarse'))
     } finally {
       setLoading(false)
     }

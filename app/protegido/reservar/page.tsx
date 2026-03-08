@@ -9,18 +9,22 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { CARE_ROUTES, formatCostRange, type CareRouteId } from '@/lib/care-routes'
+import { createClient } from '@/lib/supabase/client'
 import { CheckCircle2, ArrowLeft, CreditCard } from 'lucide-react'
 
 function ReservarContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const supabase = createClient()
   const rutaId = searchParams.get('ruta') as CareRouteId | null
+  const sessionId = searchParams.get('sessionId')
 
   const [route, setRoute] = useState<typeof CARE_ROUTES[CareRouteId] | null>(null)
   const [amount, setAmount] = useState(0)
   const [cuotas, setCuotas] = useState(6)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const [form, setForm] = useState({
     nombre: '',
     email: '',
@@ -44,9 +48,37 @@ function ReservarContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setSubmitError(null)
+
+    if (!rutaId) {
+      setSubmitError('No se encontró la ruta seleccionada. Vuelve a resultados e inténtalo otra vez.')
+      return
+    }
+
+    if (!sessionId) {
+      setSubmitError('No encontramos la sesión de síntomas. Vuelve a completar la evaluación para continuar.')
+      return
+    }
+
     setLoading(true)
-    // Simular envío para demo
-    await new Promise((r) => setTimeout(r, 800))
+
+    const mode = rutaId === 'teleorientacion' ? 'virtual' : 'presencial'
+
+    const { error } = await supabase.from('booking_requests').insert({
+      route_id: rutaId,
+      session_id: sessionId,
+      mode,
+      preferred_date: form.fechaPreferida || null,
+      status: 'pending',
+    })
+
+    if (error) {
+      console.error('Error creating booking request:', error)
+      setSubmitError('No pudimos guardar tu solicitud en este momento. Inténtalo nuevamente en unos segundos.')
+      setLoading(false)
+      return
+    }
+
     setSubmitted(true)
     setLoading(false)
   }
@@ -158,6 +190,11 @@ function ReservarContent() {
         <Card className="p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">Datos de Contacto</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {submitError && (
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                {submitError}
+              </div>
+            )}
             <div>
               <Label htmlFor="nombre">Nombre completo</Label>
               <Input
