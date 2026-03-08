@@ -494,7 +494,7 @@ export function CareNavigator({ onComplete }: CareNavigatorProps) {
                 {selectedSymptoms.length > 0 && (
                   <Button onClick={handleSymptomsConfirm}
                     className="w-full rounded-xl bg-primary hover:bg-primary/90 h-11 text-sm font-medium">
-                    Continuar con {selectedSymptoms.length} s\u00edntoma{selectedSymptoms.length > 1 ? 's' : ''}
+                    Continuar con {selectedSymptoms.length} síntoma{selectedSymptoms.length > 1 ? 's' : ''}
                   </Button>
                 )}
               </div>
